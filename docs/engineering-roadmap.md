@@ -5,8 +5,7 @@ quality. It does not propose new science; scientific sequencing lives in the
 [recovery roadmap](recovery-roadmap.md), and no item here amends a frozen
 protocol.
 
-Tasks 1–4 are complete. Task 6 is pending and Task 5 is deferred to a version
-boundary.
+Tasks 1–4 and 6 are complete. Task 5 is deferred to a version boundary.
 
 ## Constraints
 
@@ -143,12 +142,13 @@ No blanket reformat. Either check formatting on changed files only, or take a
 single whole-repository pass at 0.2.0 with the hash churn under C3 recorded in
 the changelog.
 
-## Task 6 — Release checklist
+## Task 6 — Release checklist (complete)
 
-`docs/release-readiness.md` records a review dated before the current tree. Write
-an ordered pre-tag checklist covering the three gates against the exact release
-commit, then run it and update that document with real findings rather than a new
-date. This runs after Tasks 2 and 4, which change `Project.toml` and add badges.
+Delivered in `docs/release-readiness.md`: an ordered pre-tag checklist freezes
+and records the candidate commit, runs the Julia, Python and exact-commit archive
+gates, requires the matching continuous-integration run and documentation site,
+and verifies the commit again immediately before tagging. The 6 September 2026
+review records the actual local and CI findings. No tag or release was created.
 
 ## Order
 

@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- An ordered pre-tag source-release checklist in `docs/release-readiness.md`,
+  including candidate-commit freezing, Julia and Python gates, an exact-commit
+  archive audit, CI and documentation verification, and recorded findings from
+  the 6 September 2026 review.
 - A Documenter site (`docs/make.jl`, `docs/Project.toml`, `docs/src/`) built and
   deployed by a `Documentation` job in continuous integration. The build assembles
   a gitignored staging tree and copies all 27 canonical documents into it byte for
