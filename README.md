@@ -2,7 +2,7 @@
 
 **Reading the gaps in the inorganic record.**
 
-[![Julia CI](https://github.com/JoshCCorby/EkaCompositions.jl/actions/workflows/ci.yml/badge.svg)](https://github.com/JoshCCorby/EkaCompositions.jl/actions/workflows/ci.yml) [![Release](https://img.shields.io/github/v/release/JoshCCorby/EkaCompositions.jl)](https://github.com/JoshCCorby/EkaCompositions.jl/releases/latest) [![MIT licence](https://img.shields.io/github/license/JoshCCorby/EkaCompositions.jl)](LICENSE)
+[![Julia CI](https://github.com/JoshCCorby/EkaCompositions.jl/actions/workflows/ci.yml/badge.svg)](https://github.com/JoshCCorby/EkaCompositions.jl/actions/workflows/ci.yml) [![Documentation](https://img.shields.io/badge/docs-dev-blue.svg)](https://JoshCCorby.github.io/EkaCompositions.jl/dev/) [![Release](https://img.shields.io/github/v/release/JoshCCorby/EkaCompositions.jl)](https://github.com/JoshCCorby/EkaCompositions.jl/releases/latest) [![MIT licence](https://img.shields.io/github/license/JoshCCorby/EkaCompositions.jl)](LICENSE)
 
 Eka ranks canonical chemical compositions and evaluates reproducible recovery experiments. It is for researchers testing stored scores and composition-level ranking methods. It supports SQLite score queries and positive–unlabelled recovery benchmarks.
 

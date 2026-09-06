@@ -85,3 +85,19 @@ jobs:
           python -m unittest discover -s test -p 'test_label_sensitivity_analysis.py' -v
           python -m unittest discover -s test -p 'test_system_holdout_analysis.py' -v
           python -m unittest discover -s test -p 'test_element_pair_analysis.py' -v
+  docs:
+    name: Documentation
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      statuses: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: julia-actions/setup-julia@v3
+        with:
+          version: '1'
+      - uses: julia-actions/cache@v3
+      - uses: julia-actions/julia-docdeploy@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

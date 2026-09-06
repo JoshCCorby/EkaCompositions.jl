@@ -1,0 +1,9 @@
+[deps]
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+DocumenterMermaid = "a078cd44-4d9c-4618-b545-3ab9d77f9177"
+EkaCompositions = "c7a2c8e1-9a94-4aec-99d6-21468f025a93"
+
+[compat]
+Documenter = "1"
+DocumenterMermaid = "0.2"
+julia = "1.10"

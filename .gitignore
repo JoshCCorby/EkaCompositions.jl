@@ -23,3 +23,7 @@ reports/local/
 .env
 .env.*
 __pycache__/
+
+# Documenter build products. docs/Manifest.toml is covered by the rule above.
+docs/build/
+docs/staging/

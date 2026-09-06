@@ -5,7 +5,8 @@ quality. It does not propose new science; scientific sequencing lives in the
 [recovery roadmap](recovery-roadmap.md), and no item here amends a frozen
 protocol.
 
-Task 1 is complete. Tasks 2–6 are pending.
+Tasks 1–4 are complete. Task 6 is pending and Task 5 is deferred to a version
+boundary.
 
 ## Constraints
 
@@ -90,28 +91,51 @@ scientific question needs a prospective protocol written before any run; the API
 tiers from Task 1; no real data (C6); do not reformat `src/` (C3); no absolute
 home paths in examples (C7).
 
-## Task 4 — Documenter site
+## Task 4 — Documenter site (complete)
 
-Canonical documents stay in `docs/`; the build never writes back to them. A new
-`docs/src/` holds authored pages, and `docs/make.jl` copies documents in at build
-time.
+Delivered in `docs/make.jl`, `docs/Project.toml` and `docs/src/`, with a
+`Documentation` job in `ci.yml` running `julia-actions/julia-docdeploy`.
 
-Copy **all** of `docs/`, not a subset: the protocol documents link to
-`mp-data-provenance-review.md`, `production-validation.md`,
-`mp-label-sensitivity.md` and `mp-pilot-reproduction.md`, and Documenter treats
-unresolvable local links as errors. The landing page is authored separately
-rather than pasted from the README, whose relative links do not survive the move.
-The `checkdocs` setting needs an explicit decision, since the default errors on
-docstrings absent from the manual.
+**The canonical documents are never written back to.** `make.jl` assembles a
+staging tree under `docs/staging/` — gitignored, rebuilt from scratch each run —
+and Documenter reads that, not `docs/`. All 27 canonical documents are copied
+byte for byte, satisfying C1 and leaving C2's manifest keys untouched.
 
-Ignore `docs/build/`, and never commit `docs/Manifest.toml` (C7).
+**Layout.** The staging tree mirrors the repository, with `docs/` renamed to
+`reference/`: authored pages sit at the root, canonical documents under
+`reference/`, and `LICENSE` and `THIRD_PARTY_NOTICES.md` are mirrored from the
+repository root. That placement is what makes the `../LICENSE` and
+`../THIRD_PARTY_NOTICES.md` links in `mp-data-provenance-review.md`,
+`performance.md` and `publication-permissions.md` resolve without editing them.
+Documenter rewrites the depth correctly under `prettyurls`, which was verified.
+The one build-time transform is on the mirrored `THIRD_PARTY_NOTICES.md`, whose
+`docs/...` links become `reference/...`; canonical documents are not rewritten.
 
-Executable examples are worth adding but should not be oversold. Documenter runs
-Julia blocks only, so the quick-start command-line output cannot be checked this
-way, and two of the three Julia blocks assert or print rather than returning a
-comparable value. Both reference the fixture by a relative path that must be
-rewritten for the documentation build's working directory. The realistic gain is
-that documented examples still execute, not that documented output still matches.
+**`checkdocs = :exports`.** The manual is required to cover the entire exported
+surface, which `docs/src/api.md` does, grouped by the three tiers from Task 1 —
+so the API contract and the reference cannot drift apart. The `Research` modules
+are listed in `checkdocs_ignored_modules`: they are internal by contract and are
+deliberately absent from the site.
+
+**Navigation** is grouped explicitly in `make.jl`. A document that is added to
+`docs/` without being grouped still ships, under "Additional documents", and a
+group entry naming a document that does not exist fails the build.
+
+**Executable examples.** Five `@example` blocks in `docs/src/getting-started.md`
+execute at build time against the shipped fixture, reached through
+`pkgdir(EkaCompositions)` rather than a relative path. As anticipated, this
+guarantees the examples still run, not that command-line output still matches;
+the quick-start shell output remains an unchecked `text` block.
+
+**Deployment.** `deploydocs` publishes to `gh-pages` using `GITHUB_TOKEN`, with
+`push_preview` on. GitHub Pages must be pointed at the `gh-pages` branch once,
+in repository settings, before the site is reachable. `/dev/` follows `main`;
+`/stable/` appears at the next tag, since `v0.1.0` predates this task. The README
+carries a dev-documentation badge.
+
+`docs/build/` and `docs/staging/` are ignored, and `docs/Manifest.toml` is
+already covered by the repository-wide `Manifest.toml` rule (C7), verified
+against the release gate.
 
 ## Task 5 — Formatting (deferred to a version boundary)
 

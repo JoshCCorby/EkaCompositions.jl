@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- A Documenter site (`docs/make.jl`, `docs/Project.toml`, `docs/src/`) built and
+  deployed by a `Documentation` job in continuous integration. The build assembles
+  a gitignored staging tree and copies all 27 canonical documents into it byte for
+  byte, so the content-hash-pinned protocols and the provenance-manifest keys are
+  untouched. `checkdocs = :exports` ties the reference to the API contract: the
+  manual must cover every exported name. Five examples in the getting-started
+  guide execute against the shipped fixture at build time. GitHub Pages must be
+  pointed at the `gh-pages` branch once before the site is reachable; `/stable/`
+  appears at the next tag, as `v0.1.0` predates the site.
+- A dev-documentation badge in the README.
+
 - `CONTRIBUTING.md`: setup, the three test commands and the release gate, the
   frozen protocol documents and provenance paths, the frozen v1 command-line
   surface, and the distinction between a software fix and a new experiment.
