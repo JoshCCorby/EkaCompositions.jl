@@ -29,7 +29,18 @@ function baseline_inputs(path,source;synthetic)
     return (;cfg,captured)
 end
 
-function run_evaluation(snapshot,audit,baseline,output;synthetic=false)
+function run_evaluation(snapshot,audit,baseline,output;synthetic=false,
+    settings=EP.Settings(),analysis_mode="fixed_compute")
+    EP.validate(settings)
+    fixed=EP.Settings()
+    if analysis_mode=="fixed_compute"
+        check(settings==fixed,"fixed-compute evaluation settings must remain frozen")
+    elseif analysis_mode=="posthoc_stability_20000"
+        check(settings==EP.Settings(max_iterations=20000),
+            "stability evaluation changes only max_iterations to 20000")
+    else
+        check(false,"unknown element-pair analysis mode")
+    end
     target=abspath(output);check(!ispath(target)&&!islink(target),"refusing to overwrite model output")
     check(isdir(dirname(target)),"output parent must exist")
     protocol=EkaCompositions.recovery_protocol(PROTOCOL)
@@ -47,14 +58,16 @@ function run_evaluation(snapshot,audit,baseline,output;synthetic=false)
             check(base.captured["$folder/$name"]==codeunits(text),"baseline membership differs from reconstructed source")
         end
     end
-    settings=EP.Settings();root=normpath(joinpath(@__DIR__,".."))
+    root=normpath(joinpath(@__DIR__,".."))
     codefiles=["src/element_pair_model.jl","src/mp_element_pair.jl","src/mp_system_holdout.jl","src/mp_label_sensitivity.jl",
         "src/mp_recovery.jl","src/mp_pu.jl","src/compositions.jl","src/mp_audit.jl","src/benchmark.jl","src/EkaCompositions.jl",
-        "scripts/run_element_pair.jl","scripts/analyze_element_pair.py","scripts/analyze_system_holdout.py","scripts/analyze_pu_pilot.py",
+        "scripts/run_element_pair.jl","scripts/run_element_pair_stability.jl","scripts/analyze_element_pair.py",
+        "scripts/analyze_element_pair_stability.py","scripts/analyze_system_holdout.py","scripts/analyze_pu_pilot.py",
         "docs/mp-element-pair-protocol.md","docs/mp-learned-feasibility.md","Project.toml"]
     isfile(joinpath(root,"Manifest.toml"))&&push!(codefiles,"Manifest.toml")
     code=Dict(n=>read(joinpath(root,n)) for n in codefiles)
     cfg=Dict{String,Any}("schema_version"=>1,"protocol_id"=>PROTOCOL,"protocol_sha256"=>protocol.sha256,"is_synthetic"=>synthetic,
+        "analysis_mode"=>analysis_mode,
         "model_id"=>EP.MODEL_ID,"designs"=>collect(SH.DESIGNS),"policies"=>collect(SH.POLICIES),"split_seeds"=>seeds,"budgets"=>budgets,
         "settings"=>Dict(string(k)=>getproperty(settings,k) for k in fieldnames(EP.Settings)),"tie_seed"=>20260901,
         "baseline_config_sha256"=>digest(base.captured["config.toml"]),"input_hashes"=>Dict(n=>digest(b) for (n,b) in source.files),

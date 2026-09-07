@@ -21,27 +21,29 @@ ELEMENTS=sorted(set('H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V 
 def pair(f):return tuple(e for e in sorted(vector(f)) if e!='O')
 
 
-def numerical_state(factors,counts,t):
+def numerical_state(factors,counts,t,settings=SETTINGS):
     # Independent objective/gradient calculation from the actual saved factors.
-    gradient={e:[0.01*x for x in factors[e]] for e in ELEMENTS}
-    loss=0.005*sum(x*x for row in factors.values() for x in row)
+    regularization=settings['regularization'];missing_weight=settings['missing_weight'];rank=settings['rank']
+    gradient={e:[regularization*x for x in factors[e]] for e in ELEMENTS}
+    loss=0.5*regularization*sum(x*x for row in factors.values() for x in row)
     for i,a in enumerate(ELEMENTS):
         for b in ELEMENTS[i+1:]:
             count=counts.get((a,b),0)
             residual=sum(x*y for x,y in zip(factors[a],factors[b]))-math.log1p(count)/math.log1p(t)
-            weighted=(1.0 if count else 0.01)*residual
+            weighted=(1.0 if count else missing_weight)*residual
             loss+=0.5*weighted*residual
-            for k in range(4):
+            for k in range(rank):
                 gradient[a][k]+=weighted*factors[b][k]
                 gradient[b][k]+=weighted*factors[a][k]
     pg=math.sqrt(sum((x-max(0,x-g))**2 for e in ELEMENTS for x,g in zip(factors[e],gradient[e])))
     return loss,pg
 
 
-def validate(run):
+def validate(run,expected_settings=SETTINGS,expected_mode="fixed_compute"):
     cfg=tomllib.loads((run/'config.toml').read_text())
     require(cfg['protocol_id']=='eka-mp-element-pair-v1' and cfg['protocol_sha256']==PROTOCOL_SHA and sha(run/'protocol.md')==PROTOCOL_SHA,'protocol mismatch')
-    require(cfg['settings']==SETTINGS and cfg['model_id']=='eka-element-pair-symnmf-v1' and cfg['tie_seed']==20260901,'model configuration mismatch')
+    require(cfg['settings']==expected_settings and cfg['model_id']=='eka-element-pair-symnmf-v1' and cfg['tie_seed']==20260901,'model configuration mismatch')
+    require(cfg.get('analysis_mode','fixed_compute')==expected_mode,'analysis mode mismatch')
     require(cfg['designs']==list(DESIGNS) and cfg['policies']==list(POLICIES),'wrong branches')
     seeds,budgets=cfg['split_seeds'],cfg['budgets']
     require(cfg['is_synthetic'] or (seeds==list(range(20)) and budgets==[20,50,100,200]),'wrong real grid')
@@ -83,20 +85,21 @@ def validate(run):
                 require([r['composition'] for r in labels]==sorted(c) and all(r['label']==('positive' if r['composition'] in h else 'unlabelled') for r in labels),'baseline evaluation-label mismatch')
                 counts=Counter(pair(f) for f in t);active={e for f in t for e in pair(f)}
                 cr=rows(folder/'pair-counts.tsv');require(len(cr)==len(counts) and {(r['element_a'],r['element_b']):int(r['count']) for r in cr}==counts,'pair-count mismatch')
-                fr=rows(folder/'factors.tsv');require(len(fr)==117*4,'incomplete factor matrix')
-                require([(r['element'],int(r['factor'])) for r in fr]==[(e,k) for e in ELEMENTS for k in range(1,5)],'factor axes mismatch')
+                rank=expected_settings['rank'];max_iterations=expected_settings['max_iterations']
+                fr=rows(folder/'factors.tsv');require(len(fr)==117*rank,'incomplete factor matrix')
+                require([(r['element'],int(r['factor'])) for r in fr]==[(e,k) for e in ELEMENTS for k in range(1,rank+1)],'factor axes mismatch')
                 factors={e:[float(r['value']) for r in fr if r['element']==e] for e in ELEMENTS}
                 require(all(math.isfinite(x) and x>=0 for v in factors.values() for x in v),'invalid factor value')
                 require(all(r['seen_in_training']==str(r['element'] in active).lower() for r in fr),'active-element mismatch')
                 require(all(all(x==0 for x in factors[e]) for e in set(ELEMENTS)-active),'nonzero cold factors')
                 trace=rows(folder/'objective.tsv');dg=di[d,p,s]
-                require([int(r['iteration']) for r in trace]==list(range(len(trace))) and len(trace)<=2001,'iteration trace mismatch')
+                require([int(r['iteration']) for r in trace]==list(range(len(trace))) and len(trace)<=max_iterations+1,'iteration trace mismatch')
                 losses=[float(r['objective']) for r in trace];residuals=[float(r['projected_gradient']) for r in trace]
                 require(all(math.isfinite(x) and x>=0 for x in losses+residuals) and all(b<=a for a,b in zip(losses,losses[1:])),'nonmonotonic/invalid objective')
-                loss,pg=numerical_state(factors,counts,len(t))
+                loss,pg=numerical_state(factors,counts,len(t),expected_settings)
                 require(math.isclose(loss,losses[-1],rel_tol=1e-10,abs_tol=1e-12) and math.isclose(pg,residuals[-1],rel_tol=1e-9,abs_tol=1e-12),'factor objective/gradient mismatch')
-                threshold=1e-4*max(1,residuals[0]);stop='projected_gradient' if residuals[-1]<=threshold else 'iteration_limit'
-                require(dg['termination']==stop and (stop!='iteration_limit' or len(trace)==2001),'termination mismatch')
+                threshold=expected_settings['tolerance']*max(1,residuals[0]);stop='projected_gradient' if residuals[-1]<=threshold else 'iteration_limit'
+                require(dg['termination']==stop and (stop!='iteration_limit' or len(trace)==max_iterations+1),'termination mismatch')
                 ranked=rows(folder/'ranking.tsv');fs=[r['composition'] for r in ranked]
                 require(len(fs)==len(c) and set(fs)==c,'incomplete ranking')
                 order=[]

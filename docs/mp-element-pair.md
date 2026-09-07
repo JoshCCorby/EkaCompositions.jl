@@ -73,3 +73,31 @@ The separate-checkout refit reproduced all 992 deterministic files,
 the complete configuration and all six analysis files exactly. Julia tests also
 passed in that checkout. The captured Manifest was unchanged. This is same-platform
 reproduction using an existing depot, not an empty-depot or cross-platform claim.
+
+## Post-hoc diagnostics and stability
+
+The later subgroup, system-concentration and 20,000-iteration diagnostics are
+reproducible from the retained primary run and one new stability run. The
+stability runner permits only the declared cap change; it is not a general
+hyperparameter interface. From the repository root, with the original local
+snapshot, audit, v2 baseline and primary pair run present, use new output paths:
+
+```sh
+julia --startup-file=no --project=. scripts/run_element_pair_stability.jl \
+  data/local/mp-ternary-snapshot reports/local/mp-ternary-audit \
+  reports/local/mp-system-holdout-v2-2026-08-31/results \
+  /absolute/path/to/new-stability-results
+
+python3 scripts/analyze_element_pair_stability.py \
+  reports/local/element-pair-evaluation-2026-08-31/results \
+  /absolute/path/to/new-stability-results \
+  /absolute/path/to/new-stability-analysis
+```
+
+The analyzer independently validates both complete runs, reconstructs every
+membership and ranking, writes per-split and aggregate diagnostics, and hashes
+its deterministic output inventory. Synthetic coverage is available with
+`--synthetic` on both Julia runners and is exercised by
+`test/test_element_pair_stability_analysis.py`. The retained real evidence is
+`reports/local/element-pair-diagnostics-stability-2026-09-07/`; it remains
+ignored and is not part of the source release.

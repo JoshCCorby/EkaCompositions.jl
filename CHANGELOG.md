@@ -7,7 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-09-07
+
 ### Added
+
+- A deterministic post-hoc stability runner and independent analyzer for the
+  newly reported system-disjoint subgroup, system-level concentration and
+  20,000-iteration diagnostics, with synthetic corruption tests, exact
+  invocation documentation and a locally retained hashed evidence bundle. The
+  frozen 2,000-iteration ranking remains primary.
+- Concise source-release notes that frame Eka as a reproducible ranking
+  benchmark rather than a validated discovery model, and a recorded decision
+  not to publish the separate record-level evidence bundle without its own final
+  contents and permissions review.
 
 - An ordered pre-tag source-release checklist in `docs/release-readiness.md`,
   including candidate-commit freezing, Julia and Python gates, an exact-commit
@@ -129,5 +141,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Release auditing checks source archives for common credential and private-key
   patterns before publication.
 
-[Unreleased]: https://github.com/JoshCCorby/EkaCompositions.jl/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/JoshCCorby/EkaCompositions.jl/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/JoshCCorby/EkaCompositions.jl/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/JoshCCorby/EkaCompositions.jl/releases/tag/v0.1.0

@@ -107,6 +107,8 @@ converged sensitivity recovered 18, 26 and 23 system-disjoint composition-holdou
 positives across the three policies; this does not change the negative subgroup
 interpretation above. The prospectively frozen 2,000-iteration result remains the
 primary result; the later run characterizes its stability rather than replacing it.
+The exact runner, independent analyzer, synthetic corruption tests and local
+hashed-evidence boundary are documented in [the element-pair execution record](mp-element-pair.md#post-hoc-diagnostics-and-stability).
 
 ## Reproduction and artifact boundaries
 

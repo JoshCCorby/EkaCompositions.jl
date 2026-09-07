@@ -84,6 +84,13 @@ not vendor those environments by accident.
    source release commit. Review any later proposed data or runtime bundle as a
    distinct artifact; keep unresolved material excluded.
 
+For the 0.1.1 release, the evidence-bundle decision is **do not publish**. The
+source-only release does not need it, and no final file-by-file contents,
+source-specific exception, attribution, environment or credential/path review
+has been completed for the record-level MP data, rankings, factors and runtime
+artifacts. This is a deferral, not a finding that such a bundle cannot be
+published after its separate review.
+
 The environment restore, original-code licensing, current MP terms check and
 source-candidate content review are complete. Any record-level data/runtime
 bundle and specific source exceptions remain separate from MIT software licensing.

@@ -5,7 +5,7 @@ type: software
 authors:
   - family-names: Corbett
     given-names: Joshua
-version: 0.1.0
+version: 0.1.1
 license: MIT
 repository-code: "https://github.com/JoshCCorby/EkaCompositions.jl"
 url: "https://github.com/JoshCCorby/EkaCompositions.jl"

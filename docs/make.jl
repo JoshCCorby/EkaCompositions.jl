@@ -98,6 +98,7 @@ const GROUPS = [
         "mp-terms-evidence.md",
         "publication-permissions.md",
         "release-readiness.md",
+        "release-notes-0.1.1.md",
     ],
 ]
 
