@@ -19,6 +19,20 @@ row, all methods use exactly the same candidates and evaluation labels.
 | system | exclude_mixed | 35.95 | 35.81 | 46.45 | 26.75 | 47.80 |
 | system | unlabel_mixed | 32.70 | 32.00 | 40.15 | 24.95 | 42.30 |
 
+The similarity baseline is also a leakage diagnostic. It is the strongest method
+under composition holdout, where candidates may share a chemical system with
+training, but the weakest method under system holdout: its 29.85, 26.75 and 24.95
+mean hits are all below the corresponding random expectations of 42.65, 35.81
+and 32.00. Maximum cosine similarity to training is therefore useful chiefly when
+system proximity is permitted; forbidding that proximity makes it
+anti-predictive in these system-holdout pools.
+
+Raw hit counts are not comparable between the two designs. Composition-holdout
+pools are 8.64–13.03% positive, whereas system-holdout pools are 32.00–42.65%
+positive. The favorable system-holdout hit totals therefore come from a much
+denser evaluation task and exceed random expectation by 22–33%, not by the raw
+difference between the designs' hit counts.
+
 Under composition holdout the element-pair model trails popularity by 0.20,
 1.95 and 1.15 mean hits across the three policies, and trails similarity by
 0.70, 5.00 and 3.95. Under system holdout it leads popularity by 7.95, 1.35
@@ -31,15 +45,38 @@ two zero and six negative splits; unlabelling mixed groups gives 12 positive,
 one zero and seven negative splits. These overlapping splits describe sensitivity,
 not independent replications or statistical significance.
 
+The composition-holdout subgroup diagnostic is negative for transfer to unseen
+systems. Only 16–22% of held-out positives are system-disjoint. Across all 20
+overlapping splits, the fixed-compute model recovers 17, 24 and 22 such positives
+at top 100 under the original, exclude-mixed and unlabel-mixed policies, versus
+uniform-random expectations of 42.13, 45.04 and 38.53. These small event counts do
+not support precise ratio estimates or confidence intervals. They show no
+demonstrated ability to prioritize system-novel positives; the composition-holdout
+signal is concentrated among positives whose chemical system occurs in training.
+
+The system-holdout top 100 also has a smaller effective decision count than its
+100 rows imply because all stoichiometries in a system share a score. Under the
+original policy it contains a mean 13.5 distinct systems, only 9.0 systems supply
+any positive hit, and concentration of hits corresponds to 5.68 equally weighted
+systems by inverse Herfindahl index. The largest system supplies 27.9% of hits on
+average, and one system can occupy 52 of 100 rows. Exclude-mixed and unlabel-mixed
+top-100 lists average 14.55 and 13.20 systems and 7.34 and 6.58 effective hit
+systems. The 52.25 mean therefore describes clustered composition hits from a
+small number of system-level ranking decisions.
+
 ## What the series establishes
 
 The original similarity comparator has a small composition-holdout advantage
-under the original label rule. Its magnitude depends on mixed-flag treatment.
-Whole-system holdout reverses the similarity-versus-popularity comparison under
-all three policies. The pair-factor model adds association information and
-improves the mean system-holdout result, but does not improve the composition
-comparison and has policy-dependent margins.
+under the original label rule. Its magnitude depends on mixed-flag treatment,
+and its reversal to below-random performance under system holdout identifies
+shared-system proximity as the mechanism behind that advantage. The pair-factor
+model improves mean system-holdout results on denser pools, but those hits are
+clustered in a small number of system decisions. It does not improve the sparse
+composition comparison and shows no demonstrated recovery ability within that
+design's system-disjoint subgroup.
 
+This task recovers withheld provenance labels from a single contemporaneous MP
+snapshot: it is partition reconstruction, not chronological discovery prediction.
 This is evidence about the specified recovery tasks and fixed configurations,
 not synthesis success, a universal ranking method, or a causal effect of chemical
 separation. System pools have different sizes/prevalence and can still contain
@@ -59,6 +96,17 @@ criterion.** This was anticipated in synthetic feasibility and frozen as a
 fixed-compute evaluation. The results do not establish converged or global optima.
 No hyperparameter, initialization, iteration checkpoint or favorable policy was
 selected after inspecting the learned results. These are not Seko model predictions.
+
+A post-hoc stability run changed only the cap from 2,000 to 20,000 iterations.
+All 120 fits then met the same stationarity criterion by iteration 11,309. None of
+the 19 already-converged top-100 lists changed, but 55 of the 101 previously capped
+lists changed, with as many as 48 of 100 compositions replaced. Top-100 hit deltas
+averaged +0.16 and ranged from -5 to +4, so aggregate means were comparatively
+stable while individual recommendations were compute-budget-sensitive. The
+converged sensitivity recovered 18, 26 and 23 system-disjoint composition-holdout
+positives across the three policies; this does not change the negative subgroup
+interpretation above. The prospectively frozen 2,000-iteration result remains the
+primary result; the later run characterizes its stability rather than replacing it.
 
 ## Reproduction and artifact boundaries
 
@@ -109,6 +157,10 @@ findings and the permitted sharing package. Any convergence study, stoichiometri
 extension, tuned model or literature-label audit should begin with a separate
 question and prospective protocol. Full Seko reproduction and production deployment
 remain outside this work.
+
+Any future rank or initialization study must be prospectively framed as stability
+characterization, predeclare its ranks, restarts and consensus metrics, report every
+run, and retain the frozen rank-4 fixed-compute result regardless of the sweep.
 
 The separate-checkout refit reproduced all 992 deterministic files,
 the complete configuration and all six analysis files exactly. Julia tests also
