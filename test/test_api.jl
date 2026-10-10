@@ -13,7 +13,7 @@ const API_CLI = [
 ]
 const API_EXPERIMENTAL = [
     :load_mp_recovery, :mp_recovery_splits, :pu_metrics, :pu_rank,
-    :write_synthetic_mp_snapshot,
+    :recovery_metrics, :write_synthetic_mp_snapshot,
 ]
 
 # Docs.meta is internal and has moved between Julia versions. Probe it, and skip
@@ -61,7 +61,8 @@ end
 
     @testset "research modules stay internal" begin
         research = EkaCompositions.Research
-        for name in (:MPLabelSensitivity, :MPSystemHoldout, :ElementPairModel, :MPElementPair)
+        for name in (:MPLabelSensitivity, :MPSystemHoldout, :ElementPairModel,
+                :PairFrequencyModel, :EvaluationSuite, :MPElementPair)
             submodule = getproperty(research, name)
             # `names` on a module with no exports returns just the module itself.
             @test names(submodule) == [name]

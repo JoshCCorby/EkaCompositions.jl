@@ -61,17 +61,23 @@ not rely on `using EkaCompositions` bringing `main` into scope.
 Part of the research surface. These may change in any 0.1.x release; a change is
 recorded in the changelog rather than in the version number.
 
-`mp_recovery_splits`, `load_mp_recovery`, `pu_rank`, `pu_metrics`,
+`mp_recovery_splits`, `load_mp_recovery`, `pu_rank`, `pu_metrics`, `recovery_metrics`,
 `write_synthetic_mp_snapshot`.
 
 `pu_rank` and `pu_metrics` are the documented interfaces for positive–unlabelled
 ranking, and are usable, but the positive–unlabelled work is research code whose
 shape follows the protocols. Treat them as experimental.
 
+`recovery_metrics` is the protocol-independent experimental metric kernel for a
+complete composition ranking and an explicit held-out relevant subset. It adds
+system-concentration and cutoff-tie diagnostics without changing `pu_metrics` or
+any frozen report schema.
+
 ## Internal
 
 Everything under `EkaCompositions.Research` — `MPLabelSensitivity`,
-`MPSystemHoldout`, `ElementPairModel`, `MPElementPair` — is internal. Nothing
+`MPSystemHoldout`, `ElementPairModel`, `PairFrequencyModel`, `EvaluationSuite`,
+`MPElementPair` — is internal. Nothing
 there is exported, no research subcommand is wired into the CLI, and interfaces
 may change between any two releases with no deprecation path. They live in the
 package so they are precompiled, tested and loaded once, not because they are a

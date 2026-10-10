@@ -18,6 +18,7 @@ export AbstractRankingMethod, ScoreRanking, SimilarityRanking, ranking_value
 export rank_compositions, rank_by_score, rank_by_similarity, similarity
 export database_info, validate_database, import_compositions, import_tsv
 export benchmark_rankings, benchmark_tsv
+export recovery_metrics
 export audit_mp_snapshot, mp_recovery_splits, split_mp_recovery
 export write_synthetic_mp_snapshot
 export load_mp_recovery, pu_rank, pu_metrics, benchmark_pu
@@ -27,6 +28,7 @@ include("ranking.jl")
 include("database.jl")
 include("import.jl")
 include("benchmark.jl")
+include("ranking_evaluation.jl")
 include("mp_snapshot.jl")
 include("mp_audit.jl")
 include("mp_recovery.jl")
@@ -44,6 +46,8 @@ module Research
     include("mp_label_sensitivity.jl")
     include("mp_system_holdout.jl")
     include("element_pair_model.jl")
+    include("pair_frequency_model.jl")
+    include("evaluation_suite.jl")
     include("mp_element_pair.jl")
 end
 

@@ -16,6 +16,8 @@ Investigation date: 22 September 2026. Audited Git HEAD: `0629ba9d600afcd0cdbf1d
 8. [Checks performed for this investigation](08-verification.md).
 9. [E0 matched system-metric specification](09-e0-system-metrics-spec.md).
 10. [E1 matched system-metric results](10-e1-system-metrics-results.md).
+11. [L1 nearest-work comparison and C15 novelty check](11-l1-nearest-work.md).
+12. [Writing guide: what to write, where to find it](12-writing-guide.md).
 
 Drafting order is Methods → Results → Introduction → Discussion → Abstract; the manuscript file uses conventional reading order. Proposed responsibilities remain unassigned. No application code, existing draft, protocol, historical evidence or Git history was edited. No data were queried from MP and nothing was published.
 
@@ -29,8 +31,10 @@ The like-for-like system-level comparison (E1, file 10) finds the following. In 
 
 ## Next three tasks
 
-E0/E1 are done (files 09–10).
+E0/E1 and L1 are done (files 09–11). L1 finds that C15 applies an established virtual-screening and recommender-systems idea to materials benchmarks; it is not a new metric. Chung et al. 2025 already shows label-scheme dependence, and SynCoTrain uses an MP experimental/theoretical endpoint close to Eka's.
 
-1. Build the complete paired-effect figure and denominator table, retaining all policies and budgets (90–120 minutes each; E2/E3).
-2. Draft F2 from the E1 tables, showing composition hits against positive hit systems for all four methods with the random expectation (60–90 minutes; F2).
-3. Read the closest literature in full and write a one-page contribution comparison, then hold the first framing review. Bring the C15 metric-divergence finding to that review, since it strengthens framing A (60–120 minutes; L1/C1).
+Figures and tables T1, T2, F1, F2, F3, S1 and the label-mode table are built (E2–E4, F2, F3; `reports/local/paper-figures-2026-09-22/`). The author works alone.
+
+1. Confirm framing A and the title, then write Methods v0.1 using [file 12](12-writing-guide.md) (W1).
+2. Write Results v0.1 around T1, F1/T2, F2 and F3 (W2).
+3. Write the Introduction, Discussion and Abstract (W3–W5). In parallel, close the L1 open items and write the data-availability statement (D1/V1).

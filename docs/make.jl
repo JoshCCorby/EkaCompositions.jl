@@ -65,6 +65,8 @@ const GROUPS = [
         "api-stability.md",
         "production-validation.md",
         "benchmarking.md",
+        "evaluation-metrics.md",
+        "evaluation-bundle-schema.md",
         "performance.md",
     ],
     "Frozen protocols" => [
@@ -89,6 +91,7 @@ const GROUPS = [
     "Findings and planning" => [
         "recovery-findings.md",
         "recovery-roadmap.md",
+        "evaluation-roadmap.md",
         "engineering-roadmap.md",
         "audit-hardening-compatibility.md",
     ],

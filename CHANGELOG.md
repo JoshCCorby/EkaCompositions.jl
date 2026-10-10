@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `recovery_metrics`, an additive experimental metric kernel for complete
+  composition rankings. It reports fixed-budget recovery, exact random
+  expectations, binary NDCG, chemical-system concentration and exact-score
+  cutoff ties without changing the frozen PU evaluator or prior report schemas.
+- An evaluation roadmap, metric semantics guide, and independent Julia/Python
+  hand-worked correctness tests for composition- and system-level recovery.
+- An internal direct pair-frequency control that ranks by the unfactorized
+  training-pair target, including coverage and deterministic tie diagnostics.
+- An internal uniform evaluation-bundle schema and writer/validator. It binds
+  scientific configuration, exact provenance artifacts, complete rankings and
+  reconstructed metrics while keeping runtime measurements outside deterministic
+  identity.
+
 ## [0.1.1] - 2026-09-07
 
 ### Added

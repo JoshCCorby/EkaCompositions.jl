@@ -1,0 +1,264 @@
+% Manuscript v0.1 -- drafted 22 September 2026 from docs/paper-planning/12-writing-guide.md.
+% Author notes (\authornote{...}) mark open items; they print in colour and must all be
+% resolved or removed before the draft is shared. Set \shownotesfalse to hide them.
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[british]{babel}
+\IfFileExists{lmodern.sty}{\usepackage{lmodern}}{}
+\usepackage{microtype}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{siunitx}
+\usepackage{xcolor}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage[hidelinks]{hyperref}
+\usepackage{caption}
+\captionsetup{font=small,labelfont=bf}
+\setlength{\emergencystretch}{2em}
+
+% Figures live in the ignored reports folder; figures/ is a local fallback copy.
+\graphicspath{{../reports/local/paper-figures-2026-09-22/}{figures/}}
+
+\newif\ifshownotes\shownotestrue
+\newcommand{\authornote}[1]{\ifshownotes{\color{red!70!black}\textsf{\small[#1]}}\fi}
+\newcommand{\hk}{\mathrm{Hits@}K}
+\sisetup{group-separator={,},group-minimum-digits=4}
+
+\title{From composition hits to chemical systems:\\ an audit of materials-recovery rankings}
+\author{Joshua Corbett\authornote{affiliation, ORCID and correspondence address to add}}
+\date{Draft v0.1, 22 September 2026}
+
+\begin{document}
+\maketitle
+
+% ---------------------------------------------------------------------------
+\begin{abstract}
+Composition-ranking benchmarks in materials informatics usually score a method by how many withheld database labels it recovers, but that count depends on how the evaluation is built. We examine this dependence in one fixed Materials Project snapshot of oxygen-containing ternaries, using withheld Materials Project experimental-provenance labels as the endpoint. Four simple rankers (uniform random, training-element popularity, maximum composition cosine similarity and a rank-four nonnegative element-pair model) are compared across two holdout designs, three policies for mixed provenance records, four budgets and 20 overlapping deterministic partitions. At a budget of 100 compositions under the original policy, similarity leads popularity by 0.50 hits in composition holdout but trails it by 14.45 in chemical-system holdout, where the pair model leads popularity by 7.95. Counting chemical systems rather than compositions changes the ordering again: in system holdout, popularity and the pair model reach 6--11 positive systems, against 20--24 for similarity and 30--39 expected under random selection. Raising the pair model's iteration cap changed 55 of 101 previously capped top-100 lists, while mean hits changed by only +0.16. Label policy, holdout design, the unit counted and the optimisation budget should therefore be reported with any recovery count. The results concern label recovery in one snapshot, not synthesis outcomes.
+\end{abstract}
+
+% ---------------------------------------------------------------------------
+\section{Introduction}
+
+The space of plausible inorganic compositions is far larger than the set that has been made and characterised, so any method that can put promising candidates near the top of a list is useful to an experimental or computational programme. Database-informed recommenders are one route to such a list. Seko and co-workers, for example, built matrix- and tensor-based recommenders over known compositions and evaluated them by how many of their top-ranked candidates appeared in other databases~\citep{seko2018,hayashi2022}. Large open resources such as the Materials Project~\citep{jain2013} make this kind of study easy to set up. They also complicate its interpretation, because they mix records of experimentally reported materials with purely computational entries, and a flag that marks a record as experimental reflects the history of the database as much as the chemistry of the compound. Composition-level recommendation can prioritise inorganic candidates, but its evaluation depends on what a database label represents.
+
+Prior work has approached this problem from several directions, with different inputs and endpoints. Positive--unlabelled (PU) learning is the common framing, because confirmed negative examples are rarely available. Chung, Walsh and Payne trained a composition-based PU model on human-curated solid-state synthesis labels for ternary oxides~\citep{chung2025}; SynthNN learned from compositions in the Inorganic Crystal Structure Database against generated formulas~\citep{antoniuk2023}; and SynCoTrain co-trained structure-based classifiers on the Materials Project experimental/theoretical flag~\citep{amariamir2025}, an endpoint close to ours.\authornote{SynCoTrain and Li specifics rest on an automated summary (file 11, marked *): read both before submission} Several of the concerns that motivate this study are already recognised in that work. Chung et al.\ showed that changing only how non-solid-state compositions are labelled moves ROC AUC from 0.921 to 0.771, and found that 141 of 168 predicted positives (83.9\%) lie in chemical systems that already contain a training positive~\citep{chung2025}. More broadly, nominally out-of-distribution splits can remain interpolation in representation space~\citep{li2025}, and clustered data can inflate apparent performance unless whole clusters are held out~\citep{meredig2018}.
+
+These precedents leave a specific gap for fixed-budget composition recovery. A list of 100 compositions is not a list of 100 independent choices: a scorer can fill it with many stoichiometries from a few element sets and be credited for each. Virtual screening met the same problem when analogue series inflated enrichment, and responded with chemotype-aware counting and cluster weighting~\citep{mackey2009,clark2008}; recommender systems likewise treat coverage as a standard objective beyond accuracy~\citep{kaminskas2016}. In the materials composition-recovery studies we examined, system coverage of held-out hits is not reported. Chung et al.'s familiarity statistic is the closest analogue, but it measures whether predictions sit in known systems rather than how many held-out positive systems a list reaches. At the same time, the label rule and the holdout construction change the training and candidate populations themselves, and a stable average count can conceal a changing set of recommendations. These effects are easiest to separate when they are examined together, on retained rankings, with explicit provenance.
+
+We therefore ask three questions. How sensitive are within-pool method comparisons to label policy and holdout design (RQ1)? How much apparent composition recovery represents coverage of distinct chemical systems (RQ2)? And how stable are recovered counts and individual recommendations to the declared optimisation budget (RQ3)? The setting is deliberately narrow: one Materials Project snapshot of oxygen-containing ternaries, two holdout designs, three provenance-label policies, four rankers and four budgets. Using that fixed snapshot and identical candidate pools, we show that conclusions from composition-recovery benchmarks depend on label policy, holdout design and the unit counted. Borrowing chemotype-aware accounting from virtual screening, we find that the methods leading on composition hits in system holdout reach the fewest positive chemical systems. We do not claim prospective discovery, a calibrated probability of synthesis, a causal effect of chemical separation, or superiority over published models.
+
+% ---------------------------------------------------------------------------
+\section{Methods}
+
+\subsection{Snapshot}
+We evaluated recovery of withheld Materials Project experimental-provenance labels within one Materials Project snapshot~\citep{jain2013} (database version 2026.04.13), retrieved on 31 August 2026 at 12:16:39 UTC with mp-api 0.46.5. The recorded query selected non-deprecated entries containing oxygen and exactly two other elements, with the flag \texttt{include\_gnome} set to false, and returned \num{24020} records. Hydrogen- and halogen-containing compositions were retained. We call this population oxygen-containing ternaries because element membership alone does not establish oxide chemistry or oxidation states. The unit of study was a reduced composition, not a crystal structure, and database timestamps were not interpreted as dates of first report.
+
+\subsection{Canonical compositions and label policies}
+Formula normalisation combined repeated element symbols, reduced positive integer amounts by their greatest common divisor and sorted the symbols into a canonical form. All records with the same reduced composition were grouped before any split was constructed, so that polymorphs or proportional spellings of one formula could not appear on both sides of a split. This gave \num{12506} compositions in \num{2630} chemical systems, where a system is the unordered set of a composition's elements.
+
+Under the original policy, a group was positive if at least one member record had its \texttt{theoretical} flag set to false, and unlabelled if every record was theoretical; this gave \num{5359} positive and \num{7147} unlabelled compositions, with no unresolved groups. Of the positive groups, \num{1343} were mixed, containing both experimental and theoretical records. Two alternative policies removed the mixed groups (\emph{exclude mixed}) or moved them to the unlabelled pool (\emph{unlabel mixed}). For every main comparison we rebuilt training sets, candidate pools and labels under each policy. The labels record database provenance, not literature-audited synthesis outcomes, and no independent chemical audit of them exists. Unlabelled compositions were never treated as failed syntheses.
+
+\subsection{Holdout designs}
+\emph{Composition holdout} selected $\lfloor P/5 \rfloor$ positive compositions for evaluation, where $P$ is the policy-specific positive count. The remaining positives formed the training set, and every eligible unlabelled composition joined the held-out positives as a candidate. \emph{Chemical-system holdout} instead selected $\lfloor S/5 \rfloor = 526$ of the $S = \num{2630}$ systems, from a common universe defined before policy filtering. Training then contained only positives outside the selected systems, and candidates were the eligible positive and unlabelled compositions inside them; unlabelled compositions outside the selected systems were unused. Both designs used 20 predeclared split seeds (0--19) with versioned SHA-256 ordering, and disjointness of compositions (and, for system holdout, of systems) was checked after reconstructing each membership. Because the two designs change candidate membership, prevalence and training size together, their contrast does not isolate a causal effect of chemical separation.
+
+\subsection{Reference rankers}
+Let $T$ be the training set, $E(c)$ the elements of candidate $c$, and $n(e)$ the number of training compositions that contain element $e$, each composition counted once. \emph{Element popularity} and \emph{maximum similarity} scored candidates as
+\begin{equation}
+s_{\mathrm{pop}}(c)=\frac{\sum_{e\in E(c)} n(e)}{|E(c)|\,|T|},\qquad
+s_{\mathrm{cos}}(c)=\max_{t\in T}\frac{\mathbf{c}\cdot\mathbf{t}}{\lVert\mathbf{c}\rVert\,\lVert\mathbf{t}\rVert},
+\end{equation}
+where $\mathbf{c}$ and $\mathbf{t}$ are reduced element-count vectors. The \emph{random} reference used a versioned hash ordering with ranking seed $10000+s$ for split seed $s$; its analytical comparator is uniform sampling without replacement. Rankers received only training and candidate compositions, and evaluator-held labels were attached after ranking. Exact score ties were broken by a shared formula hash (tie seed 20260901), then by canonical formula order. Released scores from Seko et al.~\citep{seko2018} were excluded before any recovery scoring, because their independence from our training data could not be established and their coverage differed by label; the exclusion says nothing about their accuracy on the task for which they were built.
+
+\subsection{Element-pair comparator}
+The learned comparator represented each oxygen-containing ternary by the pair of its two non-oxygen elements. Each distinct training composition added one to the count $C_{ab}$ of its unordered pair, and the target was $Y_{ab}=\log(1+C_{ab})/\log(1+|T|)$. We fitted a rank-four nonnegative factor matrix $F$ over the 117 non-oxygen elements,
+\begin{equation}
+\min_{F\ge 0}\;\frac12\sum_{a<b} w_{ab}\left(F_a^{\top}F_b-Y_{ab}\right)^2+\frac{\lambda}{2}\sum_{a,k}F_{ak}^2,
+\end{equation}
+with weight $w_{ab}=1$ for observed pairs and $0.01$ for unobserved pairs, and $\lambda=0.01$. This is a symmetric nonnegative factorisation~\citep{kuang2012} with low confidence placed on missing entries, as in implicit-feedback collaborative filtering~\citep{hu2008}. Optimisation used deterministic initialisation (seed 20260902) and projected gradient descent with Armijo backtracking, stopping when the projected-gradient norm fell below $10^{-4}\max(1,r_0)$, where $r_0$ is its initial value, or at a primary cap of \num{2000} iterations. A fit that reached the cap was retained as the primary fixed-compute result, as the frozen protocol allowed; meeting the stopping criterion does not prove a global optimum.
+
+A candidate's score was the dot product of its two factor rows; candidates containing an element absent from training scored zero and were flagged. \emph{Every stoichiometry in a chemical system therefore receives the same score}, and the same is true of popularity. The weak zero targets encode an association-model assumption, not verified negative compounds or an unbiased PU objective.
+
+\subsection{Outcomes}
+The primary outcome was $H_K$, the number of held-out positive compositions among the first $K=100$ candidates, with $K=20$, 50 and 200 as secondary budgets. For candidate count $N$ and held-out positive count $h$ we also recorded $H_K/K$, $H_K/h$, the enrichment $(H_K/K)/(h/N)$ and the uniform-random expectation $Kh/N$. Because $H_K/K$ is measured against unlabelled rather than confirmed-negative candidates, we do not call it precision; mean enrichment is the mean of per-split ratios. The primary contrasts were similarity minus popularity for the reference study and pair model minus popularity for the added comparator, computed within each branch (design and policy) and split. We report the mean, median, range and the numbers of positive, zero and negative differences over the 20 splits. The splits overlap, so this spread describes sensitivity to the partition rather than independent replication, and we report no $p$-values or confidence intervals.
+
+\subsection{Diagnostics}
+All diagnostics in this subsection are post hoc. Within composition holdout, we counted \emph{system-disjoint} hits: recovered positives whose system contained no training positive. For the top $K$ of every saved ranking we then counted distinct selected systems, the number of systems with at least one hit (hit systems), system recall (hit systems over held-out positive systems) and the effective number of hit systems $H^2/\sum_s h_s^2$, where $h_s$ is the number of hits from system $s$. Counting hit systems follows the ``first found'' chemotype accounting of virtual screening~\citep{mackey2009}, and the effective number plays the role of cluster weighting~\citep{clark2008}; it is a concentration index, not a sample size. The exact uniform-random expectation of hit systems is $\sum_s[1-\binom{N-r_s}{K}/\binom{N}{K}]$, where $r_s$ is the number of held-out positives in system $s$. For score-bearing methods we also recorded the range of $H_K$ achievable by reordering only the score tie that crosses the cutoff. This all-method system analysis was specified in writing before it was computed, with a pre-stated reading rule for its primary contrast (pair model minus popularity in hit systems, system holdout, $K=100$); it re-read the saved rankings, and no ranking was recomputed.
+
+The earlier label-sensitivity workflow also distinguished \emph{evaluation-only} relabelling of fixed original-policy rankings from the \emph{full-pipeline} rebuilds used for the main comparison (Table~S1). Finally, an optimisation study changed only the pair model's iteration cap, from \num{2000} to \num{20000}, and compared stopping states, top-100 membership and hits. The \num{2000}-iteration results remain primary.
+
+\subsection{Software and reproducibility}
+The workflows are implemented in the EkaCompositions package in Julia, with separate Python analysers that independently reconstruct memberships, metrics and factor-derived scores. Each retained run records protocol, source, implementation and output hashes with its execution configuration and environment. Runs executed from modified working trees retain source archives and patches as well as their base commit, because a commit identifier alone does not identify their code. The retained bundles report separate-checkout reruns and full refits with the preserved Julia 1.12.6 environment. For this manuscript we verified \num{1472} system-holdout and 992 pair-model output hashes against their run configurations, reran the stability analysis and obtained all 11 analysis files byte for byte, and reproduced the system metrics in both Julia and Python (maximum difference 0.0 across \num{1920} rows); the figure outputs are also byte-reproducible. We did not refit the models. Exact reproduction with the real data additionally depends on access to the retained snapshot and run bundles (see Data and code availability).
+
+% ---------------------------------------------------------------------------
+\section{Results}
+
+\subsection{The two holdouts build different tasks}
+The \num{24020} records collapsed to \num{12506} compositions, of which \num{5359} were positive under the original policy (Table~\ref{tab:populations}). Composition holdout used \num{8218} candidates and \num{1071} held-out positives in every split, a prevalence of 0.13 and a random expectation of 13.03 hits in the top 100. System holdout used on average \num{2513.55} candidates (range \num{2359}--\num{2710}) and \num{1071.80} held-out positives, a prevalence of 0.43 and a random expectation of 42.65. Raw hit counts therefore cannot be compared across designs: a larger count under system holdout reflects, at least in part, a candidate pool three times as dense in positives, and says nothing by itself about the difficulty of the chemical task.
+
+\begin{table}[t]
+\centering
+\caption{Populations for one Materials Project snapshot of oxygen-containing ternaries. System-holdout cells are means [min--max] over 20 overlapping holdouts; composition-holdout counts are constant. Random expectation uses each split's $h/N$. Source: 12,506 compositions (5,359 positive, 7,147 unlabelled, 1,343 mixed) in 2,630 systems; 526 systems selected per system-holdout split.}
+\label{tab:populations}
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{llrrrrr}
+\toprule
+Design & Policy & Eligible P / U & Training & Candidates $N$ & Held-out $h$ & Random $E[H_{100}]$\\
+\midrule
+Composition & Original & 5,359 / 7,147 & 4,288 & 8,218 & 1,071 & 13.03\\
+Composition & Exclude mixed & 4,016 / 7,147 & 3,213 & 7,950 & 803 & 10.10\\
+Composition & Unlabel mixed & 4,016 / 8,490 & 3,213 & 9,293 & 803 & 8.64\\
+System & Original & 5,359 / 7,147 & 4,287.20 & 2,513.55 [2,359--2,710] & 1,071.80 & 42.65\\
+System & Exclude mixed & 4,016 / 7,147 & 3,212.20 & 2,245.55 [2,096--2,416] & 803.80 & 35.81\\
+System & Unlabel mixed & 4,016 / 8,490 & 3,212.20 & 2,513.55 [2,359--2,710] & 803.80 & 32.00\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Method ordering depends on policy, design and budget}
+Within composition holdout under the original policy, the three score-bearing methods were close at $K=100$: similarity recovered 13.40 positives on average, popularity 12.90 and the pair model 12.70, against a random expectation of 13.03 (Table~\ref{tab:outcomes}, Figure~\ref{fig:paired}). Under the two alternative policies similarity led popularity by +3.05 and +2.80, positive in 15 of 20 splits each. Under system holdout the similarity ordering reversed: similarity recovered 29.85 positives, popularity 44.30 and the pair model 52.25, against 42.65 expected at random, and similarity minus popularity was $-14.45$, $-19.70$ and $-15.20$ across the three policies, negative in 19 of 20 splits under each. The reversal is consistent with dependence on shared-system proximity, but the two protocols also differ in their candidate pools and prevalence. Pair model minus popularity in system holdout was +7.95 (13 positive, 2 zero, 5 negative splits), +1.35 (12/2/6) and +2.15 (12/1/7).
+
+\begin{table}[t]
+\centering
+\caption{Primary Hits@100 on identical within-branch candidate pools: means over 20 overlapping holdouts. Differences are paired within split; counts are positive/zero/negative splits. Enrichment is the mean of per-split ratios. Entries measure recovery of withheld provenance labels.}
+\label{tab:outcomes}
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{llrrrrrrrr}
+\toprule
+Design & Policy & $E[H]$ & Random & Pop. & Sim. & Pair & Sim.$-$pop. & Pair$-$pop. & Pair enr.\\
+\midrule
+Composition & Original & 13.03 & 11.55 & 12.90 & 13.40 & 12.70 & +0.50 (10/3/7) & $-$0.20 (9/4/7) & 0.974\\
+Composition & Exclude & 10.10 & 9.05 & 14.70 & 17.75 & 12.75 & +3.05 (15/1/4) & $-$1.95 (4/3/13) & 1.262\\
+Composition & Unlabel & 8.64 & 7.85 & 11.30 & 14.10 & 10.15 & +2.80 (15/3/2) & $-$1.15 (9/1/10) & 1.175\\
+System & Original & 42.65 & 43.35 & 44.30 & 29.85 & 52.25 & $-$14.45 (1/0/19) & +7.95 (13/2/5) & 1.224\\
+System & Exclude & 35.81 & 35.95 & 46.45 & 26.75 & 47.80 & $-$19.70 (1/0/19) & +1.35 (12/2/6) & 1.334\\
+System & Unlabel & 32.00 & 32.70 & 40.15 & 24.95 & 42.30 & $-$15.20 (1/0/19) & +2.15 (12/1/7) & 1.320\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{f1-paired-differences.pdf}
+\caption{Within-split differences in Hits@100 relative to training-element popularity, for two holdout designs and three provenance-label policies. Dots are the 20 predeclared, overlapping holdouts; the bar marks the median and the open diamond the mean. Comparisons within a panel share candidates and labels; different designs do not, and their $y$-scales differ. Spread is descriptive split sensitivity, not a confidence interval. Derived from Materials Project data (database version 2026.04.13, retrieved 31 August 2026; CC BY 4.0); records were grouped by canonical composition and labelled by the stated policy, and only aggregate counts are shown.}
+\label{fig:paired}
+\end{figure}
+
+These orderings also depend on the budget (Figure~S1). Under the original composition-holdout policy, similarity minus popularity was $-1.85$ at $K=20$ (negative in 17 splits), +0.50 at $K=100$ and $-0.35$ at $K=200$, and pair model minus popularity moved from $-3.40$ at $K=20$ (negative in all 20 splits) to +1.95 at $K=200$. Several margins are also small relative to cutoff ties. Popularity and the pair model had a score tie crossing the $K=100$ cutoff in 16--20 of 20 splits in every branch. Reordering only those tie blocks, with saved scores fixed, moves the system-holdout pair-minus-popularity margin between $+3.50$ and $+12.90$ under the original policy, $-2.00$ and $+4.20$ under exclude mixed, and $-1.20$ and $+6.05$ under unlabel mixed; the original composition-holdout similarity margin of +0.50 spans $-0.90$ to $+1.65$. The saved hash tie order lay within 0.4 hits of the random-tie expectation for every method. Of the three system-holdout pair margins, only the original-policy one keeps its sign under the least favourable tie order.
+
+\subsection{Composition hits versus systems reached}
+Composition hits do not count distinct successful systems. Within composition holdout, the pair model recovered only 17, 24 and 22 system-disjoint positives in its top 100, summed over the 20 splits for the three policies, against random expectations of 42.13, 45.04 and 38.53. These totals count appearances across overlapping splits, not unique compounds. Under the original policy they amount to 17 of the pair model's 254 top-100 hits, whereas 16.2\% of held-out positives were system-disjoint, so its composition-holdout hits come mostly from systems already present in training.
+
+The all-method system analysis then compared every ranking on identical held-out sets. Its pre-stated primary contrast was met under all three policies: in system holdout at $K=100$ the pair model reached +2.80 (16/3/1), +1.15 (13/3/4) and +1.25 (14/0/6) more positive systems than popularity, out of roughly 325--362 held-out positive systems per split. By the rule fixed in advance, its composition-hit advantage therefore \emph{extends} to slightly more systems than popularity reaches. The comparison with the other methods changes that reading (Figure~\ref{fig:systems}, Table~\ref{tab:systems}). Popularity and the pair model reached 6.2--11.1 positive systems on average, compared with 20.2--23.8 for similarity and 30.1--39.4 expected under uniform random selection. Similarity reached more positive systems than popularity in all 20 splits under every policy, by +17.55, +11.65 and +11.50 on average, while recovering fewer composition hits in 19 of 20. The two system-level scorers filled their lists with whole systems: under the original policy the pair model's top 100 spanned a mean of 13.5 systems, against 58.25 for similarity and 82.55 for random, and a single system occupied up to 52 of its 100 rows. Effective hit systems were 4.49--7.00 for popularity and 5.68--7.34 for the pair model, against 15.84--17.73 for similarity. In composition holdout, by contrast, similarity led on both composition hits and hit systems, so the divergence depends on the design.
+
+The comparison also depends on the budget. In system holdout the pair model reached fewer positive systems than popularity at $K=20$ under both alternative policies ($-0.55$ and $-0.40$), and in composition holdout it reached fewer at $K=20$ and $K=50$ under every policy, with 16--20 of 20 splits negative. These system analyses are post hoc. Systems are element sets, not measures of chemical, structural or functional diversity. Because popularity and the pair model cannot separate stoichiometries within a system, their low system counts are partly built into how they score, rather than an empirical failure.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{f2-system-coverage.pdf}
+\caption{Post hoc. Composition hits against positive chemical systems reached in the top 100, for all four methods on identical pools. Each point is one split; the grey line is the exact expectation of positive systems hit by a uniform random top 100 (mean over splits). Systems are unordered element sets, not measures of chemical diversity. In system holdout, the methods leading on composition hits reach the fewest positive systems. The accounting mirrors ``first found'' chemotype counting in virtual screening~\citep{mackey2009}. Derived from Materials Project data (database version 2026.04.13, retrieved 31 August 2026; CC BY 4.0); only aggregate counts are shown.}
+\label{fig:systems}
+\end{figure}
+
+\begin{table}[t]
+\centering
+\caption{Post hoc. Mean positive systems reached in the top 100 (hit systems) over 20 overlapping holdouts, on identical pools. $E[\cdot]$ is the exact uniform-random expectation; ``Random'' is the realised random ranking.}
+\label{tab:systems}
+\small
+\begin{tabular}{llrrrrrr}
+\toprule
+Design & Policy & Held-out systems & $E[\text{hit systems}]$ & Random & Pop. & Sim. & Pair\\
+\midrule
+Composition & Original & 759.25 & 12.97 & 11.50 & 5.65 & 12.15 & 6.60\\
+Composition & Exclude & 612.80 & 10.06 & 9.05 & 9.35 & 16.30 & 6.75\\
+Composition & Unlabel & 612.80 & 8.61 & 7.85 & 7.05 & 12.85 & 5.65\\
+System & Original & 362.15 & 39.42 & 40.15 & 6.20 & 23.75 & 9.00\\
+System & Exclude & 324.60 & 33.49 & 33.85 & 9.95 & 21.60 & 11.10\\
+System & Unlabel & 324.60 & 30.13 & 31.00 & 8.65 & 20.15 & 9.90\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Recommendations shift more than mean hits}
+The primary pair-model run reached its iteration cap in 101 of 120 fits (2 designs $\times$ 3 policies $\times$ 20 splits; alternative policies share training within a design and split, so the fits are not independent). In the post hoc run with a cap of \num{20000}, all 120 fits met the same stopping criterion, the last by iteration \num{11309}. The top-100 set changed for 55 of the 101 previously capped fits, with up to 48 of 100 compositions replaced, whereas none of the 19 previously converged sets changed (Figure~\ref{fig:stability}). Hits changed by +0.16 on average, ranging from $-5$ to $+4$. Aggregate recovery was therefore far more stable than the identity of the recommended compositions. The \num{2000}-iteration results remain primary, because the longer run was not a prospectively selected method.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.85\textwidth]{f3-optimization-stability.pdf}
+\caption{Post hoc. Sensitivity of the pair model to raising only the iteration cap from 2,000 to 20,000. Points are the fits whose top 100 changed ($\times n$ marks repeated points); each panel states how many fits were unchanged, so all 120 are accounted for. Of 101 previously capped fits, 55 top-100 sets changed, with up to 48 replacements; none of the 19 previously converged sets changed. Hit changes averaged +0.16 (range $-5$ to $+4$). All longer-run fits reached the projected-gradient criterion, which does not imply a global optimum. Derived from Materials Project data (database version 2026.04.13, retrieved 31 August 2026; CC BY 4.0).}
+\label{fig:stability}
+\end{figure}
+
+% ---------------------------------------------------------------------------
+\section{Discussion}
+
+\paragraph{Evaluation design decides what a result can claim.}
+The variation across these recovery tasks shows why a ranking result should be reported with its label rule, candidate population and budget. Under one policy and budget, similarity is marginally ahead of popularity; under another budget it is behind; under system holdout it is well behind. The reversal is consistent with dependence on shared-system proximity, but the two protocols also differ in their candidate pools and prevalence, so it does not identify a cause. This parallels earlier observations in neighbouring settings: Chung et al.\ found that relabelling one class of compositions changed ROC AUC by 0.15~\citep{chung2025}, nominal out-of-distribution splits can remain interpolative~\citep{li2025}, and holding out whole clusters changes apparent performance~\citep{meredig2018}. In practice, each headline count should travel with its label rule; its candidate count, held-out count and random expectation; every frozen budget, not only the primary one; paired within-split differences with their sign counts; and the range produced by cutoff ties. None of these requires a new experiment, and most of them altered a conclusion here. The present study adds a fixed-budget, provenance-label example in which these choices are crossed on one snapshot and identical pools, not a general solution to extrapolation in materials. Its scope is limited: one snapshot, oxygen-containing ternaries, simple methods, and no chronological holdout of the kind used by SynthNN~\citep{antoniuk2023}.
+
+\paragraph{The useful unit may be coarser than a composition row.}
+A top-100 composition list is not 100 distinct chemical choices. Composition Hits@K credits a scorer that is constant within a system for filling the budget with that system's stoichiometries, and in system holdout this is how popularity and the pair model lead on hits. At the same budget, similarity reaches roughly two to four times as many positive systems as either, and random selection more still. Neither count is the right one on its own. Following the caution of Mackey and Melville that ``first found'' counting has drawbacks when combined with quantitative metrics~\citep{mackey2009}, and the cluster weighting of Clark and Webster-Clark~\citep{clark2008}, we suggest that composition-recovery benchmarks report hit systems and effective hit systems alongside Hits@K, not instead of it; coverage in recommender systems provides the general frame~\citep{kaminskas2016}. Two limits apply. Element sets are not structural or functional diversity, and more systems are not automatically better for a user whose aim is to explore one system in depth. And popularity and the pair model cannot separate stoichiometries within a system by construction. A natural next step is a system-level endpoint that ranks element systems directly and scores positive systems in the top $k$; that analysis would need its own specification and has not been run.
+
+\paragraph{Reproducibility and stability are necessary but not sufficient.}
+Retaining complete rankings and optimisation traces made it possible to see that a stable average can hide a changing list: over half of the capped fits changed their top 100, some by nearly half, while mean hits barely moved. The cutoff-tie ranges give a second example of the same fragility, since several reported margins could change sign under a different, equally valid tie order. Both matter when a model is used to choose a short list, even though neither longer optimisation nor a different tie rule constitutes a new method. Exact computational reproduction cannot validate the provenance proxy, remove research-frequency bias from the labels, establish synthesis outcomes or prove a global optimum. Stronger chemical claims would require independently audited labels, new data and a prospectively designed evaluation. What this study offers instead is a transparent account of what one recovery experiment measures, and of the reporting needed before such rankings can support stronger conclusions.
+
+% ---------------------------------------------------------------------------
+\section*{Data and code availability}
+\authornote{Draft; depends on backlog tasks D1 and V1. Confirm tag/commits and any archive DOI.}
+The EkaCompositions source code is released under the MIT licence at version \texttt{v0.1.1}, with the matched system-metric analysis and figure script added in later commits \authornote{commit IDs, including 8fd1bb7 and the figure-script commit}. The aggregate tables and figures in this article are derived from Materials Project data (database version 2026.04.13, retrieved 31 August 2026) under CC BY 4.0, with records grouped by canonical composition and relabelled by the stated policies. Row-level derived artefacts (the composition records, split memberships, rankings and fitted factors) have not yet been reviewed for release and are not distributed with this article. Exact reproduction of the real-data results therefore depends on access to the retained snapshot and run bundles; \authornote{state the access route for reviewers}. The repository's synthetic workflows can be run without these inputs.
+
+\section*{Author contributions}
+\authornote{CRediT statement to confirm.} J.C.: conceptualisation, methodology, software, formal analysis, data curation, visualisation, writing -- original draft, writing -- review and editing.
+
+\section*{Competing interests}
+\authornote{To supply.}
+
+\section*{Acknowledgements}
+\authornote{Funding and acknowledgements to supply.}
+
+\bibliographystyle{unsrtnat}
+\bibliography{references}
+
+% ---------------------------------------------------------------------------
+\clearpage
+\appendix
+\renewcommand{\thefigure}{S\arabic{figure}}
+\renewcommand{\thetable}{S\arabic{table}}
+\setcounter{figure}{0}
+\setcounter{table}{0}
+\section*{Supplementary information}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{s1-all-budgets.pdf}
+\caption{Paired differences from popularity at every frozen budget. Lines join means across the same 20 overlapping splits; vertical bars show the split range. Budget dependence is part of the result: no $K$ defines a universal ordering. Derived from Materials Project data (database version 2026.04.13, retrieved 31 August 2026; CC BY 4.0).}
+\label{fig:budgets}
+\end{figure}
+
+\begin{table}[h]
+\centering
+\caption{Label-sensitivity modes (composition holdout, similarity $-$ popularity Hits@K; mean and positive/zero/negative splits). Evaluation-only relabels fixed original-policy rankings and is not a newly trained alternative-policy experiment; full-pipeline rebuilds training, candidates and labels.}
+\label{tab:modes}
+\small
+\begin{tabular}{llrrrr}
+\toprule
+Mode & Policy & $K=20$ & $K=50$ & $K=100$ & $K=200$\\
+\midrule
+Evaluation-only & Original & $-$1.85 (1/2/17) & $-$0.05 (10/3/7) & +0.50 (10/3/7) & $-$0.35 (10/1/9)\\
+Evaluation-only & Exclude & $-$1.05 (3/7/10) & +1.40 (13/3/4) & +4.15 (17/1/2) & +3.70 (17/0/3)\\
+Evaluation-only & Unlabel & $-$1.00 (4/7/9) & +1.50 (14/2/4) & +3.55 (16/3/1) & +3.65 (17/0/3)\\
+Full-pipeline & Original & $-$1.85 (1/2/17) & $-$0.05 (10/3/7) & +0.50 (10/3/7) & $-$0.35 (10/1/9)\\
+Full-pipeline & Exclude & $-$2.05 (3/1/16) & $-$2.05 (4/2/14) & +3.05 (15/1/4) & +10.10 (19/0/1)\\
+Full-pipeline & Unlabel & $-$1.35 (4/3/13) & $-$1.70 (6/2/12) & +2.80 (15/3/2) & +12.05 (20/0/0)\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\authornote{Supplement still to add: E1 tables at all budgets (E1 \texttt{report.md}), full tie-sensitivity table, protocol chronology (file 01, lines 44--60) and the verification record (file 08).}
+
+\end{document}
