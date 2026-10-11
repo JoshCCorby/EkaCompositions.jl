@@ -2,9 +2,9 @@
 
 Prepared 11 October 2026. Owner for all issues: Joshua Corbett, with Codex assisting.
 Project title for Linear: **Eka Materials Selection MVP**. These are local IDs and
-issue drafts; no Linear project or issues have been created yet. An authenticated
-desktop session was found in the Dialext workspace/team. Publication is pending
-confirmation of the intended destination and an uninterrupted control session.
+issue drafts; no Linear project or issues have been created yet. Joshua confirmed
+the Dialext workspace/team by instructing Codex to proceed. Publication is pending
+an uninterrupted desktop session or sign-in through the independent in-app browser.
 
 When publishing, search for existing Eka work first. Reuse an appropriate project
 and update matching issues rather than creating duplicates. Resolve Joshua's
@@ -200,10 +200,11 @@ completion criteria; deferred work stays deferred unless evidence warrants it.
 
 ## Linear publication record
 
-- Workspace/team: Dialext is accessible; awaiting confirmation that Eka belongs there.
+- Workspace/team: Dialext, confirmed by Joshua's instruction to proceed.
 - Project URL: not created.
 - Issue mappings: none created.
 - Existing work to check for duplication: Eka projects and materials-selection issues.
-- Access: no connector exposed; desktop access works, but the duplicate search
-  was interrupted when the user changed browser tabs. No issues were submitted.
+- Access: no connector exposed. Desktop actions were interrupted by browser
+  activity, including an attempt to open a separate window. Linear's sign-in
+  page is open in the independent in-app browser. No issues were submitted.
 - Local planning artifacts: this board, the charter, plan, and decision log.

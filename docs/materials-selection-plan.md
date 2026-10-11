@@ -34,7 +34,7 @@ cannot establish that no suitable material exists.
 | P0.2 Pilot budget | Deferred | Track MVP costs; consider paid data/hosting when a specific need appears |
 | P0.3 Named technical reviewer | Deferred | Joshua builds the prototype; first engineer feedback precedes a formal review programme |
 | P0.4 Commit and branch | Done | Existing work saved in `2ea4459`; branch is `codex/materials-selection-mvp` |
-| P0.5 Task board | Local draft ready; Linear destination pending | Backlog has owners, dependencies, artifacts, and completion criteria; the identified workspace is Dialext |
+| P0.5 Task board | Local draft ready; Linear publication pending browser access | Dialext workspace/team confirmed; backlog has owners, dependencies, artifacts, and completion criteria |
 | P0.6 Decision log | Done | Accepted decisions, proposals, and hypotheses are recorded separately |
 
 ## Build sequence

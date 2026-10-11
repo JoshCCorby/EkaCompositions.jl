@@ -68,7 +68,7 @@ its own evidence; research scores are not measures of application suitability.
 
 ## D07. Maintain a small task board
 
-Authorized; local draft prepared; Linear destination pending, 11 October 2026. Codex
+Authorized; local draft prepared; Dialext destination confirmed, 11 October 2026. Codex
 prepares the board and decision log. Use 14 MVP issues with owner, dependencies,
 artifact, and completion criteria instead of transferring all 118 old tasks.
 
@@ -79,6 +79,12 @@ Workspace/team confirmation was requested. The attempt to search for existing Ek
 records was interrupted when the user changed browser tabs; no issues were
 submitted. Resume duplicate checks after the destination is known and browser
 control is available. The local backlog is ready but is not a created Linear board.
+
+Follow-up: Joshua instructed Codex to proceed with the proposed Dialext workspace
+and team. Desktop browser activity then interrupted both navigation and opening
+a separate window. An independent in-app Linear sign-in page is ready; publication
+awaits sign-in there or an uninterrupted desktop session. This is an access
+blocker, not an outstanding request for permission to create the board.
 
 ## D08. Spend and validate in proportion to the stage
 
