@@ -1,0 +1,117 @@
+{
+  "title": "Fictional tie-rod study",
+  "objective": "Minimize mass at fixed length and tensile force.",
+  "derivation": "Assume uniform axial tension and a common safety factor n. From m = density * A * L and A >= n * F / yield_strength, minimum mass scales with density / yield_strength. Maximize the reciprocal.",
+  "direction": "maximize",
+  "powers": {
+    "tensile_yield_strength": 1,
+    "density": -1
+  },
+  "candidates": [
+    {
+      "name": "Fiction A",
+      "screen": "pass",
+      "screen_reason": "Assumed to pass the fictional screening exercise.",
+      "evidence": [
+        {
+          "property": "tensile_yield_strength",
+          "value": {
+            "kind": "range",
+            "lower": 8,
+            "upper": 10
+          },
+          "unit": "MPa",
+          "basis": "typical",
+          "source": "Authored fictional worksheet v1, row 1, tensile_yield_strength",
+          "conditions": "Fictional room-temperature rod in the axial direction",
+          "applicability": "applicable"
+        },
+        {
+          "property": "density",
+          "value": {
+            "kind": "range",
+            "lower": 1,
+            "upper": 1.1
+          },
+          "unit": "g/cm^3",
+          "basis": "typical",
+          "source": "Authored fictional worksheet v1, row 1, density",
+          "conditions": "Fictional room-temperature rod in the axial direction",
+          "applicability": "applicable"
+        }
+      ]
+    },
+    {
+      "name": "Fiction B",
+      "screen": "pass",
+      "screen_reason": "Assumed to pass the fictional screening exercise.",
+      "evidence": [
+        {
+          "property": "tensile_yield_strength",
+          "value": {
+            "kind": "range",
+            "lower": 15,
+            "upper": 19
+          },
+          "unit": "MPa",
+          "basis": "typical",
+          "source": "Authored fictional worksheet v1, row 2, tensile_yield_strength",
+          "conditions": "Fictional room-temperature rod in the axial direction",
+          "applicability": "applicable"
+        },
+        {
+          "property": "density",
+          "value": {
+            "kind": "range",
+            "lower": 1900,
+            "upper": 2100
+          },
+          "unit": "kg/m^3",
+          "basis": "typical",
+          "source": "Authored fictional worksheet v1, row 2, density",
+          "conditions": "Fictional room-temperature rod in the axial direction",
+          "applicability": "applicable"
+        }
+      ]
+    },
+    {
+      "name": "Fiction C",
+      "screen": "pass",
+      "screen_reason": "Assumed to pass the fictional screening exercise.",
+      "evidence": [
+        {
+          "property": "tensile_yield_strength",
+          "value": {
+            "kind": "range",
+            "lower": 1,
+            "upper": 2
+          },
+          "unit": "MPa",
+          "basis": "typical",
+          "source": "Authored fictional worksheet v1, row 3, tensile_yield_strength",
+          "conditions": "Fictional room-temperature rod in the axial direction",
+          "applicability": "applicable"
+        },
+        {
+          "property": "density",
+          "value": {
+            "kind": "point",
+            "lower": 1000,
+            "upper": 1000
+          },
+          "unit": "kg/m^3",
+          "basis": "typical",
+          "source": "Authored fictional worksheet v1, row 3, density",
+          "conditions": "Fictional room-temperature rod in the axial direction",
+          "applicability": "applicable"
+        }
+      ]
+    },
+    {
+      "name": "Fiction D",
+      "screen": "unknown",
+      "screen_reason": "Environmental compatibility unresolved.",
+      "evidence": []
+    }
+  ]
+}

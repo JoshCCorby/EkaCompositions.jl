@@ -1,0 +1,10 @@
+# Isolated MVP runtime, resolved and tested on Python 3.14.6.
+pydantic==2.14.1
+pydantic-core==2.50.1
+annotated-types==0.8.0
+typing-extensions==4.16.0
+typing-inspection==0.4.4
+Pint==0.26.1
+flexcache==0.3
+flexparser==0.4
+platformdirs==4.13.0

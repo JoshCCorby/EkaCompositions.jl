@@ -1,38 +1,20 @@
-# Eka Materials Selection: MVP Task Board
+# Eka Materials Selection: MVP Task Details
 
-Prepared 11 October 2026. Owner for all issues: Joshua Corbett, with Codex assisting.
-Project title for Linear: **Eka Materials Selection MVP**. These are local IDs and
-issue drafts; no Linear project or issues have been created yet. Joshua confirmed
-the Dialext workspace/team by instructing Codex to proceed. Publication is pending
-an uninterrupted desktop session or sign-in through the independent in-app browser.
+Prepared 11 October 2026; updated 13 October 2026. Owner for all tasks: Joshua
+Corbett, with Codex assisting. [AGENTS.md](../AGENTS.md) is the authoritative local
+board for task status, dependencies, and agent handoffs. This file holds each
+task's scope, artifact target, completion criteria, and eventual evidence.
 
-When publishing, search for existing Eka work first. Reuse an appropriate project
-and update matching issues rather than creating duplicates. Resolve Joshua's
-actual account and the team's workflow states. Carry dependencies into issue
-relations and add artifact links only when those artifacts exist. Record returned
-Linear IDs and URLs here after verifying creation.
+Joshua chose repository-local tracking instead of Linear. There is no pending
+publication or browser-access prerequisite. No Linear project or issues were
+created. Artifact targets below are proposed paths, not completed deliverables.
 
-The charter and decision log are prepared; existing local work is committed and
-the product branch exists. Deferred pilot/reviewer/budget tasks are not blockers.
+The charter and decision log are prepared; the research checkpoint is committed
+and the product branch exists. Deferred pilot/reviewer/budget tasks are not blockers.
 
-## Overview
-
-| Local ID | Issue | Stage | Status | Dependencies |
-| --- | --- | --- | --- | --- |
-| MVP-01 | Define three demonstration briefs | Demonstration | Ready | None |
-| MVP-02 | Inventory permitted sources and sample grade coverage | Demonstration | Ready | None; coordinate with MVP-01 |
-| MVP-03 | Establish the service and material evidence schema | Catalogue | Backlog | MVP-01, MVP-02 |
-| MVP-04 | Populate a small traceable catalogue | Catalogue | Backlog | MVP-03 |
-| MVP-05 | Implement constraint checks and tradeoff comparison | Selection | Backlog | MVP-03; synthetic data can precede MVP-04 |
-| MVP-06 | Attach exact grade sourcing links | Selection | Backlog | MVP-04 |
-| MVP-07 | Translate briefs into editable requirements | Agent workflow | Backlog | MVP-01, MVP-03 |
-| MVP-08 | Produce evidence-backed shortlist reports | Agent workflow | Backlog | MVP-04, MVP-05, MVP-06, MVP-07 |
-| MVP-09 | Build the local comparison interface | Delivery | Backlog | MVP-08 |
-| MVP-10 | Expose core operations through MCP | Delivery | Backlog | MVP-05, MVP-06, MVP-07 |
-| MVP-11 | Verify the complete demonstration workflow | First-user readiness | Backlog | MVP-08, MVP-09, MVP-10 |
-| MVP-12 | Package a runnable first-user demo | First-user readiness | Backlog | MVP-11 |
-| MVP-13 | Observe one engineer using a real task | First-user learning | Backlog | MVP-12 |
-| MVP-14 | Turn first-user feedback into the next iteration | First-user learning | Backlog | MVP-13 |
+Add dated evidence, real artifact links, verification results, and limitations to the
+relevant section before marking its task Done in AGENTS.md. Keep statuses and
+dependencies only in that board to avoid divergent copies.
 
 ## MVP-01: Define three demonstration briefs
 
@@ -45,6 +27,13 @@ Artifact target: `docs/materials-selection-demo-briefs.md`.
 Done when: three briefs state supplied facts, unresolved questions, intended
 comparison behavior, and what evidence would be needed. Choose exact applications
 with MVP-02; the bracket/enclosure/insulator ideas are suggestions, not fixed scope.
+
+Completion evidence, 2026-10-13: [three demonstration briefs](materials-selection-demo-briefs.md)
+cover a bracket, an underspecified cover, and a no-supported-match heat-spreader
+screen. Each separates supplied inputs, questions, evidence needs, and acceptance
+cases. Local links, all 14 task dependencies, three brief IDs, whitespace, and
+release audit passed. These are self-authored cases, not executed demos or customer
+validation; end-to-end checks remain MVP-11.
 
 ## MVP-02: Inventory permitted sources and sample grade coverage
 
@@ -59,6 +48,14 @@ Done when: each demo has a credible evidence route or an explicitly revised
 scope. Manually inspect representative records before choosing a catalogue size.
 Do not represent generic family pages as exact commercial grade evidence.
 
+Completion evidence, 2026-10-13: [source inventory](materials-selection-sources.md)
+records four inspected grade/alloy references, revision dates, property context,
+access failures, sourcing gaps, and manufacturer terms. An additional ceramic
+lead is explicitly excluded. No real source is approved for commercial reuse;
+the immediate scope is revised to synthetic fixtures while permissions and visual
+table checks remain prerequisites for real-data admission in MVP-04. Inventory
+links and repository release audit passed; no paid access or outreach occurred.
+
 ## MVP-03: Establish the service and material evidence schema
 
 Confirm a small implementation stack and isolate it from the Julia research
@@ -71,9 +68,29 @@ Done when: synthetic examples round-trip through validated storage; distinct
 grades stay distinct; provenance survives normalization; dependencies are pinned.
 Record the stack decision and checks in the decision log.
 
+Completion evidence, 2026-10-13: [service README and schema](../services/materials-selection/README.md),
+[validated models](../services/materials-selection/eka_materials/models.py),
+[snapshot storage](../services/materials-selection/eka_materials/storage.py), and
+[29 focused tests](../services/materials-selection/tests/test_evidence.py).
+Python 3.14.6, Pydantic 2.14.1, Pint 0.26.1, and the standard-library SQLite client
+were tested in an isolated environment; all nine runtime packages are pinned.
+
+Checks: 29 service tests and 41 existing Python tests passed; dependency check,
+CLI validation/snapshot commands, release audit, and whitespace checks passed.
+Tests cover grade separation, dimensional conversions, original provenance,
+missing/conflicting values, malformed records, reference integrity, permission
+checks, immutable revisions, and read-only retrieval. The synthetic catalogue
+round-trip hash is `3b57f1e53e7889f7376a3670c499bb632ad7b0c02e12d56b2511241c79d64c70`.
+
+Limits: only synthetic fixtures are included. This is storage and validation,
+not application approval or a comparison engine. Categorical constraints, source
+ingestion, UI, model calls, and MCP are not implemented. Julia code was unchanged;
+its test suite was not rerun in this session. See decision D10.
+
 ## MVP-04: Populate a small traceable catalogue
 
-Ingest and manually check enough grades for the demos, provisionally 15-30.
+Ingest and manually check enough grades for the demos. Start from the four
+inspected reference candidates; expand only when a demo needs more coverage.
 Preserve conflicting observations and revisions; keep source context available.
 Use synthetic fixtures for public tests and only permitted real data in the demo.
 
@@ -82,6 +99,12 @@ ingestion code and a coverage manifest in the service.
 
 Done when: every decisive value in the demos has exact source evidence, units,
 conditions, and a grade identity; repeat ingestion is reproducible.
+
+Handoff, 2026-10-13: begin with the four reference candidates in the
+[source inventory](materials-selection-sources.md), not a fixed 15-30-grade quota.
+Resolve an adequate rights basis and visually verify source context before
+admission. No real records are currently approved or ingested. This gap does not
+block MVP-05's synthetic implementation, but it does block real recommendations.
 
 ## MVP-05: Implement constraint checks and tradeoff comparison
 
@@ -94,6 +117,15 @@ Artifact target: service constraint/ranking functions and focused tests.
 Done when: equivalent units agree, unknown never becomes pass, hard failures
 cannot be offset by preferences, and supported alternatives expose their tradeoffs.
 Check typical-versus-guaranteed values and no-match behavior.
+
+Progress, 2026-11-24: the [material-index worksheet](../services/materials-selection/README.md#compare-a-shortlist-on-a-material-index)
+compares manually screened candidates using one explicitly derived power-product
+index. The [fictional example](../services/materials-selection/examples/synthetic-index.json)
+includes overlapping ranges and an unresolved screen. All 38 service tests
+passed, including [nine index checks](../services/materials-selection/tests/test_index_comparison.py).
+The CLI example ranked two candidates above a third and withheld the unresolved
+candidate. Automatic hard checks on catalogue observations and comparisons
+across preferences remain open.
 
 ## MVP-06: Attach exact grade sourcing links
 
@@ -198,13 +230,9 @@ Artifact target: updated backlog and dated decision-log entries.
 Done when: the next small iteration is justified by observed use, with clear
 completion criteria; deferred work stays deferred unless evidence warrants it.
 
-## Linear publication record
+## Tracking decision
 
-- Workspace/team: Dialext, confirmed by Joshua's instruction to proceed.
-- Project URL: not created.
-- Issue mappings: none created.
-- Existing work to check for duplication: Eka projects and materials-selection issues.
-- Access: no connector exposed. Desktop actions were interrupted by browser
-  activity, including an attempt to open a separate window. Linear's sign-in
-  page is open in the independent in-app browser. No issues were submitted.
-- Local planning artifacts: this board, the charter, plan, and decision log.
+On 12 October 2026, Joshua replaced the planned Linear setup with a local
+AGENTS.md task board. See [decision D07](materials-selection-decisions.md#d07-maintain-a-small-task-board).
+External tracker setup is not part of the build sequence. Update, 2026-10-13:
+MVP-01 through MVP-03 are complete; the current next-work handoff is in AGENTS.md.

@@ -1,9 +1,11 @@
 # Eka Materials Selection: MVP to First User
 
-Revised 11 October 2026 following Joshua's clarification. This replaces the
+Revised 13 October 2026 following Joshua's clarification. This replaces the
 8 October pilot-first sequence, retained in Git at `2ea4459`. Its recruitment,
-reviewer, budget, and benchmark targets are not current prerequisites. Product
-implementation has not started.
+reviewer, budget, and benchmark targets are not current prerequisites. The first
+three tasks are complete: demonstration briefs, source inventory, and the isolated
+evidence/storage service. The code currently uses synthetic fixtures;
+recommendations and the interface are not built.
 
 ## Direction
 
@@ -24,7 +26,8 @@ cannot establish that no suitable material exists.
 
 - [One-page charter](materials-selection-charter.md)
 - [Decision log](materials-selection-decisions.md)
-- [Task board and Linear issue drafts](materials-selection-backlog.md)
+- [Local task board and agent instructions](../AGENTS.md)
+- [Detailed task specifications](materials-selection-backlog.md)
 
 ## Phase 0 decisions
 
@@ -34,7 +37,7 @@ cannot establish that no suitable material exists.
 | P0.2 Pilot budget | Deferred | Track MVP costs; consider paid data/hosting when a specific need appears |
 | P0.3 Named technical reviewer | Deferred | Joshua builds the prototype; first engineer feedback precedes a formal review programme |
 | P0.4 Commit and branch | Done | Existing work saved in `2ea4459`; branch is `codex/materials-selection-mvp` |
-| P0.5 Task board | Local draft ready; Linear publication pending browser access | Dialext workspace/team confirmed; backlog has owners, dependencies, artifacts, and completion criteria |
+| P0.5 Task board | Done | AGENTS.md tracks all 14 tasks locally; linked backlog defines artifacts and completion criteria. Linear is not required |
 | P0.6 Decision log | Done | Accepted decisions, proposals, and hypotheses are recorded separately |
 
 ## Build sequence
@@ -49,10 +52,10 @@ cannot establish that no suitable material exists.
 | 6. Prepare a first-user demo | Reliability checks and reproducible setup | MVP-11, MVP-12 |
 | 7. Learn from an engineer | One observed real task and prioritized corrections | MVP-13, MVP-14 |
 
-These are local planning identifiers, not Linear issue IDs. Joshua owns all work;
+These are repository-local task identifiers. Joshua owns all work;
 Codex can assist with implementation and board maintenance. Completion criteria
-and artifact targets are in the backlog. Implementation starts after this planning
-revision; this document does not claim a working product already exists.
+and artifact targets are in the backlog. The task board records actual progress;
+this roadmap does not imply the full product already exists.
 
 ## 1. Define a small demonstration
 
@@ -66,8 +69,9 @@ proposals, not commitments to particular applications or materials. Include
 incomplete requirements and competing priorities.
 
 Keep the input model general. If practical, cover more than one material family;
-do not force breadth when reliable comparisons are missing. A seed set of roughly
-15-30 commercial grades is an estimate, not a quota.
+do not force breadth when reliable comparisons are missing. The initial inventory
+now identifies four reference candidates; the former 15-30-grade estimate is not
+a starting quota. No manufacturer records are approved for reuse yet.
 
 Build a source register: manufacturer, document URL, grade coverage, revision and
 access date, acquisition method, storage/display permissions, and gaps. Use
@@ -93,11 +97,10 @@ Manually check the initial decisive observations. Automated extraction can propo
 entries, but ambiguous headers, units, and footnotes need resolution before the
 values qualify a candidate. Publish a versioned catalogue.
 
-Keep the Julia research package and frozen protocols intact. The proposed new
-service lives under `services/materials-selection/`, with typed data, SQLite, a
-tested units library, and a thin MCP adapter. Python remains a proposal to confirm
-in a small implementation spike. Do not introduce a Julia/Python runtime bridge
-unless a specific reusable capability justifies it.
+Keep the Julia research package and frozen protocols intact. The new service
+lives under `services/materials-selection/`. MVP-03 established Python, Pydantic,
+Pint, and SQLite; the MCP adapter is later work. Do not introduce a Julia/Python
+runtime bridge unless a specific reusable capability justifies it.
 
 Done when: each decisive demo value resolves to a grade, condition, and source;
 unchanged inputs reproduce the catalogue identity.
@@ -213,7 +216,10 @@ The deferred work is a later product programme, not a condition of beginning.
 
 ## Next step
 
-Start with MVP-01 and MVP-02: three demo briefs and enough source evidence to
-support them. Build one complete comparison before expanding. Re-estimate after
-that first path works. The earlier 12-16 week beta schedule is withdrawn because
-it assumed a different team and validation sequence.
+MVP-01 through MVP-03 are complete. Continue with MVP-05's deterministic comparison
+logic against synthetic fixtures, while MVP-04 establishes a permitted real-data
+route. The [source inventory](materials-selection-sources.md) records the current
+rights and verification gaps; the [service README](../services/materials-selection/README.md)
+documents the runnable foundation. Build one complete comparison before expanding.
+Re-estimate after that first path works. The earlier 12-16 week beta schedule is
+withdrawn because it assumed a different team and validation sequence.

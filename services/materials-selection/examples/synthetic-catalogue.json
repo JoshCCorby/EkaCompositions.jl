@@ -1,0 +1,126 @@
+{
+  "schema_version": 1,
+  "label": "Authored synthetic fixture v1; NOT real material data",
+  "families": [
+    {"id": "family:demo-metal", "name": "Fictional metal family"},
+    {"id": "family:demo-polymer", "name": "Fictional polymer family"}
+  ],
+  "grades": [
+    {"id": "grade:demo-m1", "family_id": "family:demo-metal", "manufacturer": "Fictional Demo Works", "designation": "DEMO-M1 (fictional)"},
+    {"id": "grade:demo-m2", "family_id": "family:demo-metal", "manufacturer": "Fictional Demo Works", "designation": "DEMO-M2 (fictional)"},
+    {"id": "grade:demo-p1", "family_id": "family:demo-polymer", "manufacturer": "Fictional Demo Works", "designation": "DEMO-P1 (fictional)"}
+  ],
+  "variants": [
+    {"id": "variant:demo-m1-bar", "grade_id": "grade:demo-m1", "form": "bar", "temper": "fictional-state-a", "process": "extruded"},
+    {"id": "variant:demo-m2-bar", "grade_id": "grade:demo-m2", "form": "bar", "temper": "fictional-state-b", "process": "extruded"},
+    {"id": "variant:demo-p1-sheet", "grade_id": "grade:demo-p1", "form": "sheet", "process": "extruded"}
+  ],
+  "sources": [
+    {
+      "id": "source:authored-a", "title": "Authored fixture A; fictional values",
+      "url": "https://example.invalid/eka/fixture-a", "kind": "synthetic",
+      "revision": "1", "accessed_on": "2026-10-13",
+      "rights": {"retain": "allowed", "display": "allowed", "redistribute": "allowed", "basis": "Original synthetic software fixture under the repository MIT licence.", "checked_on": "2026-10-13"}
+    },
+    {
+      "id": "source:authored-b", "title": "Authored fixture B; intentionally conflicting evidence",
+      "url": "https://example.invalid/eka/fixture-b", "kind": "synthetic",
+      "revision": "1", "accessed_on": "2026-10-13",
+      "rights": {"retain": "allowed", "display": "allowed", "redistribute": "allowed", "basis": "Original synthetic software fixture under the repository MIT licence.", "checked_on": "2026-10-13"}
+    }
+  ],
+  "observations": [
+    {
+      "id": "observation:m1-yield", "variant_id": "variant:demo-m1-bar",
+      "property": "tensile_yield_strength", "value": {"kind": "lower_bound", "lower": 320},
+      "unit": "MPa", "basis": "specified_limit",
+      "conditions": {"temperature_k": 298.15, "thickness_min_mm": 8, "thickness_max_mm": 12, "direction": "longitudinal", "test_method": "Fictional test method A"},
+      "source_id": "source:authored-a", "locator": "Authored row M1-Y"
+    },
+    {
+      "id": "observation:m1-yield-conflict", "variant_id": "variant:demo-m1-bar",
+      "property": "tensile_yield_strength", "value": {"kind": "point", "lower": 290, "upper": 290},
+      "unit": "MPa", "basis": "measured",
+      "conditions": {"temperature_k": 298.15, "thickness_min_mm": 8, "thickness_max_mm": 12, "direction": "longitudinal", "test_method": "Fictional test method A"},
+      "source_id": "source:authored-b", "locator": "Authored row M1-Y-conflict"
+    },
+    {
+      "id": "observation:m2-yield", "variant_id": "variant:demo-m2-bar",
+      "property": "tensile_yield_strength", "value": {"kind": "lower_bound", "lower": 225},
+      "unit": "MPa", "basis": "specified_limit",
+      "conditions": {"temperature_k": 298.15, "thickness_min_mm": 8, "thickness_max_mm": 12, "test_method": "Fictional test method A"},
+      "source_id": "source:authored-a", "locator": "Authored row M2-Y"
+    },
+    {
+      "id": "observation:m1-density", "variant_id": "variant:demo-m1-bar",
+      "property": "density", "value": {"kind": "range", "lower": 3.1, "upper": 3.3},
+      "unit": "g/cm^3", "basis": "typical", "conditions": {},
+      "source_id": "source:authored-a", "locator": "Authored row M1-D"
+    },
+    {
+      "id": "observation:m2-conductivity", "variant_id": "variant:demo-m2-bar",
+      "property": "thermal_conductivity", "value": {"kind": "point", "lower": 90, "upper": 90},
+      "unit": "W/(m*K)", "basis": "typical", "conditions": {"temperature_k": 298.15},
+      "source_id": "source:authored-a", "locator": "Authored row M2-K"
+    },
+    {
+      "id": "observation:p1-conductivity", "variant_id": "variant:demo-p1-sheet",
+      "property": "thermal_conductivity", "value": {"kind": "point", "lower": 120, "upper": 120},
+      "unit": "W/(m*K)", "basis": "typical", "conditions": {"temperature_k": 298.15},
+      "source_id": "source:authored-a", "locator": "Authored deliberately artificial row P1-K"
+    },
+    {
+      "id": "observation:p1-density", "variant_id": "variant:demo-p1-sheet",
+      "property": "density", "value": {"kind": "point", "lower": 1.4, "upper": 1.4},
+      "unit": "g/cm^3", "basis": "typical", "conditions": {},
+      "source_id": "source:authored-a", "locator": "Authored row P1-D"
+    },
+    {
+      "id": "observation:p1-resistivity", "variant_id": "variant:demo-p1-sheet",
+      "property": "volume_resistivity", "value": {"kind": "missing", "missing_reason": "Not reported in the fictional source."},
+      "basis": "not_stated", "conditions": {},
+      "source_id": "source:authored-a", "locator": "Authored row P1-R marked unreported"
+    },
+    {
+      "id": "observation:p1-service", "variant_id": "variant:demo-p1-sheet",
+      "property": "service_temperature", "value": {"kind": "upper_bound", "upper": 125},
+      "unit": "degC", "basis": "guideline", "conditions": {"duration": "Duration not quantified in fictional source", "notes": "Not a guarantee of loaded performance."},
+      "source_id": "source:authored-a", "locator": "Authored row P1-T"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "task:demo-01", "revision": "1",
+      "brief": "Synthetic structured slice of DEMO-01, not a qualified bracket design.",
+      "constraints": [{
+        "id": "requirement:yield", "property": "tensile_yield_strength", "operator": ">=", "threshold": 200, "unit": "MPa",
+        "acceptable_basis": ["specified_limit"], "conditions": {"thickness_min_mm": 10, "thickness_max_mm": 10, "notes": "Room temperature supplied qualitatively; exact temperature remains unconfirmed."},
+        "origin": {"kind": "supplied", "statement": "Fictional engineer explicitly supplied the strength threshold and stock thickness."}
+      }],
+      "preferences": [{"property": "density", "direction": "minimize", "origin": {"kind": "supplied", "statement": "Lower mass at unchanged geometry."}}],
+      "open_questions": ["Confirm exact temperature, geometry, loads, and accepted evidence conditions."]
+    },
+    {
+      "id": "task:demo-02", "revision": "1",
+      "brief": "A lightweight plastic cover near a hot instrument, ideally transparent.",
+      "open_questions": ["Maximum continuous and peak material temperatures and duration?", "Is transparency mandatory?", "What chemical, impact, fire, and electrical requirements apply?"]
+    },
+    {
+      "id": "task:demo-03", "revision": "1",
+      "brief": "Synthetic no-supported-match heat-spreader case; not an exhaustive material search.",
+      "constraints": [
+        {"id": "requirement:conductivity", "property": "thermal_conductivity", "operator": ">=", "threshold": 100, "unit": "W/(m*K)", "acceptable_basis": ["typical"], "conditions": {"temperature_k": 298.15}, "origin": {"kind": "supplied", "statement": "Authored DEMO-03 threshold."}},
+        {"id": "requirement:density", "property": "density", "operator": "<=", "threshold": 2, "unit": "g/cm^3", "acceptable_basis": ["typical"], "conditions": {}, "origin": {"kind": "supplied", "statement": "Authored DEMO-03 threshold."}},
+        {"id": "requirement:resistivity", "property": "volume_resistivity", "operator": ">=", "threshold": 10000000000, "unit": "ohm*cm", "acceptable_basis": ["typical"], "conditions": {"temperature_k": 298.15}, "origin": {"kind": "supplied", "statement": "Authored DEMO-03 threshold."}}
+      ],
+      "open_questions": ["Operating environment, voltage, interfaces, and geometry remain unspecified."]
+    }
+  ],
+  "offers": [{
+    "id": "offer:demo-m1", "variant_id": "variant:demo-m1-bar",
+    "supplier": "Fictional Supplier; not an actual sourcing route",
+    "product_url": "https://example.invalid/eka/not-a-real-product",
+    "source_id": "source:authored-a", "locator": "Authored offer fixture",
+    "observed_on": "2026-10-13", "availability": "unknown"
+  }]
+}

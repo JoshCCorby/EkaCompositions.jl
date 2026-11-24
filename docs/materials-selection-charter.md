@@ -50,6 +50,6 @@ the result. Next, one engineer tries a real task and identifies what helps and
 what needs correction. Time savings, broad accuracy, and willingness to pay
 remain hypotheses.
 
-Execution: [MVP plan](materials-selection-plan.md),
-[backlog](materials-selection-backlog.md), and
+Execution: [local task board](../AGENTS.md), [MVP plan](materials-selection-plan.md),
+[task details](materials-selection-backlog.md), and
 [decision log](materials-selection-decisions.md).
