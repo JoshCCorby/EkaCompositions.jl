@@ -75,13 +75,15 @@ mp_recovery_splits
 load_mp_recovery
 pu_rank
 pu_metrics
+recovery_metrics
 write_synthetic_mp_snapshot
 ```
 
 ## Internal
 
 Everything under `EkaCompositions.Research` — `MPLabelSensitivity`,
-`MPSystemHoldout`, `ElementPairModel` and `MPElementPair` — is internal. Nothing
+`MPSystemHoldout`, `ElementPairModel`, `PairFrequencyModel`, `EvaluationSuite` and
+`MPElementPair` — is internal. Nothing
 there is exported, no research subcommand is wired into the CLI, and interfaces
 may change between any two releases with no deprecation path. They live in the
 package so they are precompiled, tested and loaded once, not because they are a

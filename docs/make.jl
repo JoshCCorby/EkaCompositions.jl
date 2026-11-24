@@ -15,11 +15,21 @@ const REPO_ROOT = normpath(joinpath(@__DIR__, ".."))
 const AUTHORED = joinpath(@__DIR__, "src")
 const STAGING = joinpath(@__DIR__, "staging")
 
-# Canonical documents are copied under this subdirectory. Their cross-links are
-# flat and same-directory, so they keep resolving. The two that escape `docs/`
-# — `../LICENSE` and `../THIRD_PARTY_NOTICES.md` — resolve because the staging
-# root sits exactly one level above, mirroring the repository layout.
+# Reference pages retain their relative links to one another and the root notices.
 const REFERENCE = "reference"
+
+"""Point the staged planning pages' repository links at the documented revision."""
+function stage_plan(source, destination, revision)
+    contents = read(source, String)
+    # Match just the path, leaving GitHub heading fragments intact.
+    destinations = r"(?<=\]\()\.\./(?:AGENTS\.md|services/materials-selection/[\w./-]+)(?=[#)])"
+    contents = replace(contents, destinations => function (target)
+        isfile(joinpath(dirname(source), target)) || error("Missing link in $source: $target")
+        path = chopprefix(target, "../")
+        return "https://github.com/JoshCCorby/EkaCompositions.jl/blob/$revision/$path"
+    end)
+    write(destination, contents)
+end
 
 """
 Assemble the Documenter source tree. Returns the sorted list of canonical
@@ -36,8 +46,7 @@ function stage!()
     # Mirror the repository root files that canonical documents link to as `../`.
     # The staging tree reproduces the repository layout with one renaming —
     # `docs/` becomes `reference/` — so links pointing into `docs/` from a
-    # mirrored root file are rewritten to match. Only these mirrored copies are
-    # rewritten; the canonical documents are copied byte for byte.
+    # mirrored root file are rewritten to match.
     for entry in ("LICENSE", "THIRD_PARTY_NOTICES.md")
         source = joinpath(REPO_ROOT, entry)
         destination = joinpath(STAGING, entry)
@@ -50,8 +59,15 @@ function stage!()
 
     mkpath(joinpath(STAGING, REFERENCE))
     documents = sort!(filter(endswith(".md"), readdir(@__DIR__)))
+    revision = readchomp(`git -C $REPO_ROOT rev-parse HEAD`)
     for document in documents
-        cp(joinpath(@__DIR__, document), joinpath(STAGING, REFERENCE, document))
+        source = joinpath(@__DIR__, document)
+        destination = joinpath(STAGING, REFERENCE, document)
+        if startswith(document, "materials-selection-")
+            stage_plan(source, destination, revision)
+        else
+            cp(source, destination)
+        end
     end
     return documents
 end
@@ -65,6 +81,8 @@ const GROUPS = [
         "api-stability.md",
         "production-validation.md",
         "benchmarking.md",
+        "evaluation-metrics.md",
+        "evaluation-bundle-schema.md",
         "performance.md",
     ],
     "Frozen protocols" => [
@@ -89,6 +107,7 @@ const GROUPS = [
     "Findings and planning" => [
         "recovery-findings.md",
         "recovery-roadmap.md",
+        "evaluation-roadmap.md",
         "engineering-roadmap.md",
         "audit-hardening-compatibility.md",
     ],
